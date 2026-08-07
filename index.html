@@ -487,6 +487,149 @@
             font-size: 0.85rem;
             transition: all 0.3s ease;
         }
+
+        /* Custom Page Number footer styling */
+        .print-page-number {
+            display: none;
+        }
+
+        /* PRINT STYLING (A4 PDF Export) */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0 !important; /* Suppress all browser-generated headers, footers, and file paths */
+            }
+
+            /* Completely hide the web app interactive dashboard */
+            .container {
+                display: none !important;
+            }
+
+            /* Make report wrapper active during printing */
+            .print-only {
+                display: block !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important; /* Suppress extra margins */
+                margin: 0 !important;
+                font-size: 10pt !important;
+            }
+
+            /* 4 A4 Printable Pages configuration (Hard A4 dimensions) */
+            .print-page {
+                display: block !important;
+                position: relative !important;
+                width: 210mm !important; /* Physical A4 width */
+                height: 297mm !important; /* Physical A4 height */
+                padding: 15mm 20mm 15mm 20mm !important; /* Mandate identical print margins for all pages */
+                box-sizing: border-box !important;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+            }
+
+            /* Prevent empty page at the end of the report */
+            #print-page-4 {
+                page-break-after: avoid !important;
+            }
+
+            .card {
+                background: #ffffff !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin-bottom: 20px !important;
+                page-break-inside: avoid; /* Prevent card splitting across pages */
+            }
+
+            .card-title {
+                border-bottom: 2px solid #000000 !important;
+                color: #000000 !important;
+                font-size: 12pt !important;
+                margin-bottom: 12px !important;
+                padding-bottom: 4px !important;
+            }
+
+            /* Tables styling for crisp black and white report printing */
+            table {
+                width: 100% !important;
+                font-size: 8.5pt !important;
+                table-layout: auto !important;
+                border-collapse: collapse !important;
+            }
+
+            th {
+                background-color: #f1f5f9 !important;
+                color: #000000 !important;
+                border-bottom: 2px solid #000000 !important;
+                padding: 5px 3px !important;
+                text-align: center !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            td {
+                border-bottom: 1px solid #cbd5e1 !important;
+                color: #000000 !important;
+                padding: 4px 3px !important;
+                text-align: center !important;
+            }
+
+            /* Page 2: Stack canvases one above another vertically and constrain sizes */
+            #print-page-2 .card {
+                width: 100% !important;
+                margin-bottom: 10px !important;
+            }
+
+            #print-page-2 .canvas-container {
+                border: none !important;
+                background: none !important;
+                padding: 0 !important;
+                min-height: auto !important;
+            }
+
+            #print-page-2 canvas {
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+                max-width: 80% !important;
+                max-height: 85mm !important; /* Constrain single canvas height to fit perfectly with page padding */
+                height: auto !important;
+                margin: 5px auto !important;
+                display: block !important;
+            }
+
+            /* Badges colors adjustment for black and white readability */
+            .badge {
+                border: 1px solid #000000 !important;
+                background: none !important;
+                color: #000000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* Page Break controls */
+            .page-break {
+                page-break-before: always !important;
+            }
+
+            /* Page Number styling: aligned at bottom right of each physical print-page container */
+            .print-page-number {
+                display: block !important;
+                position: absolute !important;
+                bottom: 15mm !important; /* Perfectly aligned to bottom margin offset */
+                right: 20mm !important;  /* Perfectly aligned to right margin offset */
+                font-size: 10pt !important;
+                color: #333333 !important;
+                font-weight: 500 !important;
+                border-top: none !important;
+                padding-top: 0 !important;
+                margin: 0 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -498,6 +641,10 @@
                 <p>整合 ASD (容許應力設計法) 與 USD (極限強度設計法) 鋼筋混凝土配筋檢核</p>
             </div>
             <div class="header-controls">
+                <button id="export-pdf-btn" onclick="exportToPDF()" class="btn-preset" style="display: flex; align-items: center; gap: 6px; padding: 10px 14px;">
+                    <span>📄</span>
+                    <span>匯出計算書 (PDF)</span>
+                </button>
                 <button id="theme-toggle-btn" onclick="toggleTheme()" class="btn-preset" style="display: flex; align-items: center; gap: 6px; padding: 10px 14px;">
                     <span id="theme-icon">🌙</span>
                     <span id="theme-text">深色模式</span>
@@ -508,6 +655,8 @@
                 </div>
             </div>
         </header>
+
+        <!-- PRINT ONLY WRAPPER REMOVED FROM HERE -->
 
         <!-- GLOBAL JS ERROR CONSOLE -->
         <div id="error-console" style="display:none; background-color:#fee2e2; border-left:4px solid #dc2626; padding:16px; margin-bottom:24px; border-radius:8px; color:#991b1b; font-family:'JetBrains Mono',monospace; font-size:0.85rem; line-height: 1.5; box-shadow: var(--shadow-md);"></div>
@@ -597,7 +746,7 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <label for="input-z1">地下水位深度(地面下) z1</label>
+                            <label for="input-z1">地下水位深度 z1</label>
                             <div class="input-wrapper">
                                 <input type="number" id="input-z1" value="5.0" step="0.1" min="0" oninput="triggerCalculation()">
                                 <span class="input-unit">m</span>
@@ -635,7 +784,7 @@
                 </div>
 
                 <!-- CARD: Canvas Diagram 1 -->
-                <div class="card">
+                <div class="card" id="card-diag-1">
                     <div class="card-title">箱涵結構比例剖面與力學受力圖 (Canvas)</div>
                     <div class="canvas-container">
                         <canvas id="structureCanvas" width="600" height="500"></canvas>
@@ -643,18 +792,19 @@
                 </div>
 
                 <!-- CARD: Canvas Diagram 2 -->
-                <div class="card">
+                <div class="card" id="card-diag-2">
                     <div class="card-title">箱涵結構剖面配筋示意圖 (Canvas)</div>
                     <div class="canvas-container">
                         <canvas id="rebarCanvas" width="600" height="500"></canvas>
                     </div>
+                    <div class="print-page-number">第 1 頁，共 3 頁</div>
                 </div>
             </div>
 
             <!-- RIGHT PANEL: Outputs -->
             <div class="right-panel">
                 <!-- CARD: Mid Calculations -->
-                <div class="card">
+                <div class="card" id="card-mid-calc">
                     <div class="card-title">三、中間力學載重計算</div>
                     <div class="data-row">
                         <div class="data-label">外側寬高 Bo / Do</div>
@@ -691,7 +841,7 @@
                 </div>
 
                 <!-- CARD: Fixed End Moments & Equation Solver -->
-                <div class="card">
+                <div class="card" id="card-fem">
                     <div class="card-title">四、桿件固端力矩與節點旋轉角</div>
                     <div style="margin-bottom: 12px; font-weight: 500; font-size: 0.95rem;">固端力矩 (Fixed End Moments, FEM):</div>
                     <div class="form-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
@@ -733,7 +883,7 @@
                 </div>
 
                 <!-- CARD: Bending Moment & Shear Result Table -->
-                <div class="card">
+                <div class="card" id="card-results">
                     <div class="card-title">五、各桿件端點內力結果</div>
                     <div class="table-responsive">
                         <table>
@@ -777,7 +927,7 @@
                 </div>
 
                 <!-- CARD: Reinforcement Concrete Design Check -->
-                <div class="card">
+                <div class="card page-break print-page" id="card-rebar-check">
                     <div class="card-title">
                         六、鋼筋混凝土配筋設計與安全檢核
                         <span>寬度 b = 100 cm 斷面檢算</span>
@@ -941,10 +1091,13 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="print-page-number">第 3 頁，共 4 頁</div>
                 </div>
 
-                <!-- CARD: Dynamic Detail Moment & Shear distribution (Collapsible) -->
-                <div class="card">
+                <!-- GROUP: Page 4 Container -->
+                <div class="page-break print-page" id="card-force-details" style="border: none; background: none; box-shadow: none; padding: 0;">
+                    <!-- CARD: Dynamic Detail Moment & Shear distribution (Collapsible) -->
+                    <div class="card" style="margin-bottom: 20px !important;">
                     <div class="collapsible-header" onclick="toggleDetails()">
                         <div style="font-weight: 600; font-size: 1.05rem;">七、桿件沿線斷面內力分佈明細 (0 至 L)</div>
                         <div class="arrow-icon" id="detail-arrow">▶</div>
@@ -1087,13 +1240,132 @@
                         </li>
                     </ul>
                 </div>
+                <div class="print-page-number">第 4 頁，共 4 頁</div>
+            </div>
             </div>
         </div>
 
         <!-- FOOTER SECTION -->
         <footer>
-            <p>© 2026 版權所有 製作者：劉哲旻</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <span>© 2026 版權所有 製作者：劉哲旻</span>
+                <span class="print-page-number-inline" style="display: none;">第 3 頁，共 3 頁</span>
+            </div>
         </footer>
+    </div>
+
+    <!-- PRINT ONLY REPORT WRAPPER (同級於 .container) -->
+    <div class="print-only" style="display: none;">
+        <!-- Page 1 Container -->
+        <div class="print-page" id="print-page-1">
+            <div style="text-align: center; margin-bottom: 20px; border-bottom: 3px double #000000; padding-bottom: 10px;">
+                <h1 style="font-size: 22pt; font-weight: 700; margin-bottom: 5px; color: #000000;">單孔箱涵結構計算書</h1>
+                <div style="display: flex; justify-content: space-between; font-size: 10pt; color: #333333; margin-top: 12px;">
+                    <span><strong>計算方法：</strong><span id="print-method">ASD 容許應力法</span></span>
+                    <span><strong>報告日期：</strong><span id="print-date">2026-08-07</span></span>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: 15px !important;">
+                <div class="card-title" style="font-weight: 600; font-size: 1.05rem; border-bottom: 2px solid #000000; padding-bottom: 4px; margin-bottom: 10px;">結構設計輸入參數彙整清冊</div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%; text-align: left; padding: 4px; font-size: 8pt;">設計參數項目</th>
+                            <th style="width: 25%; text-align: left; padding: 4px; font-size: 8pt;">設定數值</th>
+                            <th style="width: 25%; text-align: left; padding: 4px; font-size: 8pt;">設計參數項目</th>
+                            <th style="width: 25%; text-align: left; padding: 4px; font-size: 8pt;">設定數值</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>箱涵淨寬 Bi</strong></td>
+                            <td id="print-Bi" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- m</td>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>頂版覆土 He</strong></td>
+                            <td id="print-He" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- m</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>箱涵淨高 Di</strong></td>
+                            <td id="print-Di" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- m</td>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>地下水位深度 z1</strong></td>
+                            <td id="print-z1" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- m</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>頂版厚度 Tu</strong></td>
+                            <td id="print-Tu" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- m</td>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>土壤單位重 γ</strong></td>
+                            <td id="print-gamma" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- t/m³</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>底版厚度 Td</strong></td>
+                            <td id="print-Td" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- m</td>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>土壤飽和單位重 γsat</strong></td>
+                            <td id="print-gammasat" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- t/m³</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>側版厚度 Tb</strong></td>
+                            <td id="print-Tb" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- m</td>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>內摩擦角 φ</strong></td>
+                            <td id="print-phi" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- deg</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>混凝土強度 fc'</strong></td>
+                            <td id="print-fc" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- kg/cm²</td>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>地面超載 q</strong></td>
+                            <td id="print-q" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- t/m²</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>鋼筋強度 fy</strong></td>
+                            <td id="print-fy" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- kg/cm²</td>
+                            <td style="padding: 4px; border-bottom: 1px solid var(--td-border); font-size: 8pt;"><strong>保護層厚度 d'</strong></td>
+                            <td id="print-cover" style="padding: 4px; border-bottom: 1px solid var(--td-border); font-family: monospace; font-size: 8pt;">- cm</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Section 3 Mid Calculations will be cloned here -->
+            <div id="print-page-1-mid-calc"></div>
+            
+            <div class="print-page-number">第 1 頁，共 4 頁</div>
+        </div>
+
+        <!-- Page 2 Container (Canvas Diagram Stack) -->
+        <div class="print-page page-break" id="print-page-2">
+            <div class="card" style="margin-bottom: 15px !important;">
+                <div class="card-title">二、結構幾何與桿件力學模型圖</div>
+                <div style="font-size: 9.5pt; margin-bottom: 10px; color:#555;">下圖展示箱涵結構斷面之比例受力圖（上）與配筋示意圖（下），做為配筋檢核之幾何依據。</div>
+            </div>
+            
+            <div class="card" style="margin-bottom: 10px !important;">
+                <div style="font-weight: 600; font-size: 10pt; margin-bottom: 5px; text-align: center;">箱涵結構比例剖面與力學受力圖</div>
+                <div class="canvas-container" style="text-align: center;">
+                    <canvas id="print-structure-canvas" width="600" height="500"></canvas>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: 10px !important;">
+                <div style="font-weight: 600; font-size: 10pt; margin-bottom: 5px; text-align: center;">箱涵結構剖面配筋示意圖</div>
+                <div class="canvas-container" style="text-align: center;">
+                    <canvas id="print-rebar-canvas" width="600" height="500"></canvas>
+                </div>
+            </div>
+            
+            <div class="print-page-number">第 2 頁，共 4 頁</div>
+        </div>
+
+        <!-- Page 3 Container (FEM & Reinforcement Check) -->
+        <div class="print-page page-break" id="print-page-3">
+            <div id="print-page-3-results" style="margin-bottom: 15px;"></div>
+            <div id="print-page-3-rebar-check"></div>
+            <div class="print-page-number">第 3 頁，共 4 頁</div>
+        </div>
+
+        <!-- Page 4 Container (Internal Force Distribution Collapsible & Info) -->
+        <div class="print-page page-break" id="print-page-4">
+            <div id="print-page-4-details"></div>
+            <div class="print-page-number">第 4 頁，共 4 頁</div>
+        </div>
     </div>
 
     <!-- CORE JAVASCRIPT LOGIC -->
@@ -1471,6 +1743,38 @@
 
             document.getElementById('row-ac-x').innerHTML = `<td>座標 y (m)</td>` + res.ac_y.map(y => `<td class="mono">${y.toFixed(3)}</td>`).join('');
             document.getElementById('row-ac-m').innerHTML = `<td>彎矩 M (t-m)</td>` + res.ac_m.map(m => `<td class="mono">${m.toFixed(3)}</td>`).join('');
+
+            // Sync with Print Only Table
+            const pMethod = document.getElementById('print-method');
+            if (pMethod) pMethod.textContent = currentMethod === 'ASD' ? 'ASD 容許應力設計法' : 'USD 極限強度設計法';
+            
+            const pDate = document.getElementById('print-date');
+            if (pDate) pDate.textContent = new Date().toLocaleDateString('zh-TW');
+            
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            };
+            
+            setVal('print-Bi', `${parseFloat(inBi.value).toFixed(2)} m`);
+            setVal('print-Di', `${parseFloat(inDi.value).toFixed(2)} m`);
+            setVal('print-Tu', `${parseFloat(inTu.value).toFixed(2)} m`);
+            setVal('print-Td', `${parseFloat(inTd.value).toFixed(2)} m`);
+            setVal('print-Tb', `${parseFloat(inTb.value).toFixed(2)} m`);
+            setVal('print-He', `${parseFloat(inHe.value).toFixed(2)} m`);
+            setVal('print-z1', `${parseFloat(inZ1.value).toFixed(2)} m`);
+            setVal('print-gamma', `${parseFloat(inGamma.value).toFixed(2)} t/m³`);
+            setVal('print-gammasat', `${parseFloat(inGammaSat.value).toFixed(2)} t/m³`);
+            setVal('print-phi', `${parseFloat(inPhi.value).toFixed(1)} deg`);
+            setVal('print-q', `${parseFloat(inQ.value).toFixed(2)} t/m²`);
+            
+            const rf = document.getElementById('rebar-fc');
+            const ry = document.getElementById('rebar-fy');
+            const rc = document.getElementById('rebar-cover');
+            
+            if (rf) setVal('print-fc', `${parseFloat(rf.value)} kg/cm²`);
+            if (ry) setVal('print-fy', `${parseFloat(ry.value)} kg/cm²`);
+            if (rc) setVal('print-cover', `${parseFloat(rc.value)} cm`);
         }
 
         // Concrete Reinforcement Verification Logic
@@ -2414,6 +2718,142 @@
                 content.classList.toggle('expanded');
                 arrow.classList.toggle('rotated');
             }
+        }
+
+        // Export structural calculation report as PDF (A4 format)
+        function exportToPDF() {
+            // Ensure Section 7 (Internal Force Detail) is expanded so the full data prints out
+            const detailSection = document.getElementById('detail-section');
+            const detailArrow = document.getElementById('detail-arrow');
+            if (detailSection && detailArrow && !detailSection.classList.contains('expanded')) {
+                detailSection.classList.add('expanded');
+                detailArrow.classList.add('rotated');
+            }
+
+            // 1. Sync Method Factor and Current Date stamps
+            const isASD = document.getElementById('btn-asd').classList.contains('active');
+            document.getElementById('print-method').textContent = isASD ? "ASD 容許應力設計法" : "USD 極限強度設計法";
+            document.getElementById('print-date').textContent = new Date().toLocaleDateString('zh-TW');
+
+            // 2. Clone active dashboard widgets to designated print blocks
+            cloneTableToPrint('card-mid-calc', 'print-page-1-mid-calc');
+            cloneTableToPrint('card-results', 'print-page-3-results');
+            cloneTableToPrint('card-rebar-check', 'print-page-3-rebar-check');
+            cloneTableToPrint('card-force-details', 'print-page-4-details');
+
+            // 3. Sync canvases content synchronously using drawImage
+            const structCanvas = document.getElementById('structureCanvas');
+            const rebarCanvas = document.getElementById('rebarCanvas');
+            const printStructCanvas = document.getElementById('print-structure-canvas');
+            const printRebarCanvas = document.getElementById('print-rebar-canvas');
+            
+            if (structCanvas && printStructCanvas) {
+                const ctx = printStructCanvas.getContext('2d');
+                ctx.clearRect(0, 0, 600, 500);
+                ctx.drawImage(structCanvas, 0, 0);
+            }
+            if (rebarCanvas && printRebarCanvas) {
+                const ctx = printRebarCanvas.getContext('2d');
+                ctx.clearRect(0, 0, 600, 500);
+                ctx.drawImage(rebarCanvas, 0, 0);
+            }
+
+            // 4. Trigger print context dialog
+            window.print();
+        }
+
+        // Helper to clone tables and clean inputs/selects to static read-only spans
+        function cloneTableToPrint(sourceId, targetId) {
+            const source = document.getElementById(sourceId);
+            const target = document.getElementById(targetId);
+            if (!source || !target) return;
+            
+            // Clone inner HTML markup
+            target.innerHTML = source.innerHTML;
+            
+            // Overwrite classes and clean up interactive wrappers
+            const wrapper = target.querySelector('.card');
+            if (wrapper) {
+                wrapper.className = '';
+                wrapper.style.boxShadow = 'none';
+                wrapper.style.border = 'none';
+                wrapper.style.background = 'none';
+                wrapper.style.padding = '0';
+                wrapper.style.margin = '0';
+            }
+
+            // Format card-titles to clean report headers
+            const cardTitle = target.querySelector('.card-title');
+            if (cardTitle) {
+                cardTitle.style.borderBottom = '2px solid #000000';
+                cardTitle.style.color = '#000000';
+                cardTitle.style.fontWeight = '600';
+                cardTitle.style.fontSize = '12pt';
+                cardTitle.style.paddingBottom = '4px';
+                cardTitle.style.marginBottom = '12px';
+            }
+
+            // Filter out developer alerts but retain engineering formula info
+            const alerts = target.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                if (!alert.classList.contains('alert-info')) {
+                    alert.parentNode.removeChild(alert);
+                }
+            });
+
+            // Suppress scroll responsive wrappers
+            const resp = target.querySelector('.table-responsive');
+            if (resp) {
+                resp.style.overflow = 'visible';
+            }
+
+            // Convert interactive input elements to bold text spans
+            const inputs = target.querySelectorAll('input');
+            inputs.forEach(inp => {
+                const span = document.createElement('span');
+                span.textContent = inp.value;
+                span.className = 'mono';
+                span.style.fontWeight = 'bold';
+                span.style.fontSize = '9.5pt';
+                inp.parentNode.replaceChild(span, inp);
+            });
+            
+            // Convert dropdown select lists to bold text spans
+            const selects = target.querySelectorAll('select');
+            selects.forEach(sel => {
+                const span = document.createElement('span');
+                span.textContent = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : sel.value;
+                span.className = 'mono';
+                span.style.fontWeight = 'bold';
+                span.style.fontSize = '9.5pt';
+                sel.parentNode.replaceChild(span, sel);
+            });
+
+            // Convert badged text to clean text boxes
+            const badges = target.querySelectorAll('.badge');
+            badges.forEach(badge => {
+                badge.style.border = '1px solid #000000';
+                badge.style.background = 'none';
+                badge.style.color = '#000000';
+                badge.style.padding = '2px 6px';
+            });
+            
+            // Format collapsible header elements to static print titles
+            const collHeader = target.querySelector('.collapsible-header');
+            if (collHeader) {
+                const titleDiv = collHeader.querySelector('div');
+                if (titleDiv) {
+                    collHeader.innerHTML = titleDiv.innerHTML;
+                    collHeader.className = 'card-title';
+                    collHeader.style.borderBottom = '2px solid #000000';
+                    collHeader.style.paddingBottom = '4px';
+                    collHeader.style.marginBottom = '12px';
+                }
+            }
+
+            // Remove internal page-number elements cloned from dashboard layouts
+            const pageNums = target.querySelectorAll('.print-page-number');
+            pageNums.forEach(pn => pn.parentNode.removeChild(pn));
         }
 
         // Toggle theme (Light / Dark)
