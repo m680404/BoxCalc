@@ -1,0 +1,2468 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>單孔箱涵結構計算與力學分析系統</title>
+    <!-- Google Fonts Inter for clean typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --secondary: #ea580c;
+            --secondary-light: #fff7ed;
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border-color: #cbd5e1;
+            --border-focus: #3b82f6;
+            --success: #16a34a;
+            --success-light: #dcfce7;
+            --danger: #dc2626;
+            --danger-light: #fee2e2;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            
+            /* Header Theme Variables (Light: White background) */
+            --header-bg: #ffffff;
+            --header-border: 1px solid var(--border-color);
+            --header-shadow: var(--shadow-sm);
+            --header-text: var(--text-main);
+            --header-subtitle: var(--text-muted);
+            --header-title-color: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            --btn-preset-bg: #f1f5f9;
+            --btn-preset-text: var(--text-main);
+            --btn-preset-hover: #e2e8f0;
+            --toggle-container-bg: #f1f5f9;
+            --toggle-btn-text: var(--text-muted);
+            
+            --input-bg: #f8fafc;
+            --input-bg-focus: #ffffff;
+            --td-border: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --primary-light: rgba(59, 130, 246, 0.15);
+            --secondary: #f97316;
+            --secondary-light: rgba(249, 115, 22, 0.15);
+            --bg-main: #0b0f19;
+            --bg-card: #151f32;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+            --border-color: #27354a;
+            --border-focus: #60a5fa;
+            --success: #10b981;
+            --success-light: rgba(16, 185, 129, 0.15);
+            --danger: #f87171;
+            --danger-light: rgba(239, 68, 68, 0.15);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+            
+            /* Header Theme Variables (Dark: Dark purple/blue gradient) */
+            --header-bg: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            --header-border: 1px solid transparent;
+            --header-shadow: var(--shadow-lg);
+            --header-text: #ffffff;
+            --header-subtitle: #cbd5e1;
+            --header-title-color: linear-gradient(135deg, #38bdf8 0%, #a5b4fc 100%);
+            --btn-preset-bg: #27354a;
+            --btn-preset-text: #f8fafc;
+            --btn-preset-hover: #334155;
+            --toggle-container-bg: #27354a;
+            --toggle-btn-text: #94a3b8;
+            
+            --input-bg: #1e293b;
+            --input-bg-focus: #28354e;
+            --td-border: #27354a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        /* Header Style */
+        header {
+            background: var(--header-bg);
+            border: var(--header-border);
+            color: var(--header-text);
+            padding: 24px 32px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            box-shadow: var(--header-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .header-title h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin-bottom: 4px;
+            background: var(--header-title-color);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: background 0.3s ease;
+        }
+
+        .header-title p {
+            font-size: 0.9rem;
+            color: var(--header-subtitle);
+            transition: color 0.3s ease;
+        }
+
+        /* Toggle Switches */
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .method-toggle-container {
+            background-color: var(--toggle-container-bg);
+            padding: 4px;
+            border-radius: 10px;
+            display: flex;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        .method-toggle-btn {
+            padding: 8px 18px;
+            border: none;
+            background: none;
+            color: var(--toggle-btn-text);
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .method-toggle-btn.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-preset {
+            padding: 10px 16px;
+            background-color: var(--btn-preset-bg);
+            color: var(--btn-preset-text);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-preset:hover {
+            background-color: var(--btn-preset-hover);
+        }
+
+        /* Layout Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 1.3fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Container */
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 18px;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        /* Form Controls */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input, .input-wrapper select {
+            width: 100%;
+            padding: 10px 32px 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+        .input-wrapper input:focus, .input-wrapper select:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            background-color: var(--input-bg-focus);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .input-unit {
+            position: absolute;
+            right: 10px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* Alert Styling */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.875rem;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .alert-info {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            color: #1e3a8a;
+        }
+
+        .alert-warning {
+            background-color: var(--secondary-light);
+            border-left: 4px solid var(--secondary);
+            color: #7c2d12;
+        }
+
+        .alert-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        /* Canvas Wrapper */
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--input-bg);
+            border-radius: 8px;
+            border: 1px dashed var(--border-color);
+            overflow: hidden;
+            padding: 10px;
+            min-height: 480px;
+        }
+
+        canvas {
+            display: block;
+            background-color: var(--bg-card);
+            border-radius: 6px;
+            box-shadow: var(--shadow-sm);
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Table Styling */
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background-color: var(--input-bg);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 10px 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--td-border);
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        tr:hover td {
+            background-color: var(--input-bg);
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.825rem;
+        }
+
+        /* Stress Panel Cards */
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--td-border);
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .data-value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Check Results Badge */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .badge-ok {
+            background-color: var(--success-light);
+            color: var(--success);
+        }
+
+        .badge-ng {
+            background-color: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .pill-blue {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .pill-orange {
+            background-color: var(--secondary-light);
+            color: var(--secondary);
+        }
+
+        /* Collapsible Section */
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px 0;
+            user-select: none;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .collapsible-content.expanded {
+            max-height: 2000px;
+            transition: max-height 0.5s ease-in;
+        }
+
+        .arrow-icon {
+            transition: transform 0.2s;
+        }
+
+        .arrow-icon.rotated {
+            transform: rotate(90deg);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .table-input select, .table-input input {
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px 0 12px 0;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER SECTION -->
+        <header>
+            <div class="header-title">
+                <h1>單孔箱涵結構計算與力學分析系統</h1>
+                <p>整合 ASD (容許應力設計法) 與 USD (極限強度設計法) 鋼筋混凝土配筋檢核</p>
+            </div>
+            <div class="header-controls">
+                <button id="theme-toggle-btn" onclick="toggleTheme()" class="btn-preset" style="display: flex; align-items: center; gap: 6px; padding: 10px 14px;">
+                    <span id="theme-icon">🌙</span>
+                    <span id="theme-text">深色模式</span>
+                </button>
+                <div class="method-toggle-container">
+                    <button class="method-toggle-btn active" id="btn-asd" onclick="setDesignMethod('ASD')">ASD 容許應力法</button>
+                    <button class="method-toggle-btn" id="btn-usd" onclick="setDesignMethod('USD')">USD 極限強度法</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- GLOBAL JS ERROR CONSOLE -->
+        <div id="error-console" style="display:none; background-color:#fee2e2; border-left:4px solid #dc2626; padding:16px; margin-bottom:24px; border-radius:8px; color:#991b1b; font-family:'JetBrains Mono',monospace; font-size:0.85rem; line-height: 1.5; box-shadow: var(--shadow-md);"></div>
+
+        <!-- MAIN LAYOUT -->
+        <div class="dashboard-grid">
+            <!-- LEFT PANEL: Inputs & Canvas -->
+            <div class="left-panel">
+                <!-- CARD: Method Factors -->
+                <div class="card">
+                    <div class="card-title">
+                        設計控制與載重組合
+                        <span id="current-method-lbl">當前：ASD</span>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="input-group">
+                            <label>載重組合因數</label>
+                            <div class="mono" style="font-size: 0.85rem; line-height: 1.6;" id="factors-desc">
+                                靜載重因數 γDL = 1.00<br>
+                                土壓力因數 γH = 1.00<br>
+                                水壓力因數 γH = 1.00
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="traffic-select">頂版車道活載重選項</label>
+                            <div class="input-wrapper">
+                                <select id="traffic-select" onchange="triggerCalculation()">
+                                    <option value="surcharge">僅考慮地面超載 q (P4=1)</option>
+                                    <option value="H20">考慮 AASHTO H20 活載力矩</option>
+                                    <option value="H15">考慮 AASHTO H15 活載力矩</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD: Input Parameters -->
+                <div class="card">
+                    <div class="card-title">一、結構斷面尺寸</div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="input-Bi">箱涵淨寬 Bi</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-Bi" value="3.5" step="0.1" min="0.5" oninput="triggerCalculation()">
+                                <span class="input-unit">m</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-Di">箱涵淨高 Di</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-Di" value="3.5" step="0.1" min="0.5" oninput="triggerCalculation()">
+                                <span class="input-unit">m</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-Tu">頂版厚度 Tu</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-Tu" value="0.40" step="0.05" min="0.1" oninput="triggerCalculation()">
+                                <span class="input-unit">m</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-Td">底版厚度 Td</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-Td" value="0.45" step="0.05" min="0.1" oninput="triggerCalculation()">
+                                <span class="input-unit">m</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-Tb">側版厚度 Tb</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-Tb" value="0.30" step="0.05" min="0.1" oninput="triggerCalculation()">
+                                <span class="input-unit">m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">二、環境與土壤載重參數</div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="input-He">頂版覆土深度 He</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-He" value="0.7" step="0.1" min="0" oninput="triggerCalculation()">
+                                <span class="input-unit">m</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-z1">地下水位深度(地面下) z1</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-z1" value="5.0" step="0.1" min="0" oninput="triggerCalculation()">
+                                <span class="input-unit">m</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-gamma">土壤單位重 γ</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-gamma" value="2.31" step="0.01" min="0.5" oninput="triggerCalculation()">
+                                <span class="input-unit">t/m³</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-gammasat">土壤飽和單位重 γsat</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-gammasat" value="2.31" step="0.01" min="0.5" oninput="triggerCalculation()">
+                                <span class="input-unit">t/m³</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-phi">土壤內摩擦角 φ</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-phi" value="23.1" step="0.1" min="0" max="60" oninput="triggerCalculation()">
+                                <span class="input-unit">deg</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-q">地面超載 q</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-q" value="1.0" step="0.1" min="0" oninput="triggerCalculation()">
+                                <span class="input-unit">t/m²</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD: Canvas Diagram 1 -->
+                <div class="card">
+                    <div class="card-title">箱涵結構比例剖面與力學受力圖 (Canvas)</div>
+                    <div class="canvas-container">
+                        <canvas id="structureCanvas" width="600" height="500"></canvas>
+                    </div>
+                </div>
+
+                <!-- CARD: Canvas Diagram 2 -->
+                <div class="card">
+                    <div class="card-title">箱涵結構剖面配筋示意圖 (Canvas)</div>
+                    <div class="canvas-container">
+                        <canvas id="rebarCanvas" width="600" height="500"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Outputs -->
+            <div class="right-panel">
+                <!-- CARD: Mid Calculations -->
+                <div class="card">
+                    <div class="card-title">三、中間力學載重計算</div>
+                    <div class="data-row">
+                        <div class="data-label">外側寬高 Bo / Do</div>
+                        <div class="data-value mono" id="calc-BoDo">4.10 m / 4.35 m</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">結構中心尺寸 B / D (桿件長度)</div>
+                        <div class="data-value mono" id="calc-BD">3.80 m / 3.925 m</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">側向主動土壓係數 Ka</div>
+                        <div class="data-value mono" id="calc-Ka">0.4364</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">有效浸水土重 γsub</div>
+                        <div class="data-value mono" id="calc-gammasub">1.31 t/m³</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">等效活載重均佈荷重 (頂版) qLL</div>
+                        <div class="data-value mono" id="calc-qll">0.00 t/m²</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">頂版總載重 W1 (已乘因數)</div>
+                        <div class="data-value mono" id="calc-W1">3.577 t/m</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">底盤反力 W2 (已乘因數)</div>
+                        <div class="data-value mono" id="calc-W2">5.886 t/m</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">側版頂端受力 P1 / 底端受力 P2 (已乘因數)</div>
+                        <div class="data-value mono" id="calc-P1P2">1.142 t/m / 3.679 t/m</div>
+                    </div>
+                </div>
+
+                <!-- CARD: Fixed End Moments & Equation Solver -->
+                <div class="card">
+                    <div class="card-title">四、桿件固端力矩與節點旋轉角</div>
+                    <div style="margin-bottom: 12px; font-weight: 500; font-size: 0.95rem;">固端力矩 (Fixed End Moments, FEM):</div>
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
+                        <div class="data-row" style="background:#f8fafc; padding:8px 12px; border-radius:6px;">
+                            <div class="data-label">FAB (頂版端)</div>
+                            <div class="data-value mono" id="calc-FAB">-4.304 t-m</div>
+                        </div>
+                        <div class="data-row" style="background:#f8fafc; padding:8px 12px; border-radius:6px;">
+                            <div class="data-label">FAC (側牆頂)</div>
+                            <div class="data-value mono" id="calc-FAC">2.769 t-m</div>
+                        </div>
+                        <div class="data-row" style="background:#f8fafc; padding:8px 12px; border-radius:6px;">
+                            <div class="data-label">FCA (側牆底)</div>
+                            <div class="data-value mono" id="calc-FCA">-3.421 t-m</div>
+                        </div>
+                        <div class="data-row" style="background:#f8fafc; padding:8px 12px; border-radius:6px;">
+                            <div class="data-label">FCD (底版端)</div>
+                            <div class="data-value mono" id="calc-FCD">7.083 t-m</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 12px; font-weight: 500; font-size: 0.95rem;">求解對稱傾角變位平衡方程式：</div>
+                    <div class="alert alert-info mono" style="font-size: 0.82rem; margin-bottom: 16px;">
+                        (1) [2K_AB + 4K_AC] θA + 2K_AC θC = - (F_AB + F_AC)<br>
+                        (2) 2K_AC θA + [2K_CD + 4K_AC] θC = - (F_CA + F_CD)
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">相對勁度比 K_AB / K_AC / K_CD</div>
+                        <div class="data-value mono" id="calc-Kratio">0.00140 / 0.00057 / 0.00200</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">求解旋轉角 θA (qA / E)</div>
+                        <div class="data-value mono" id="calc-thetaA">450.39</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">求解旋轉角 θC (qC / E)</div>
+                        <div class="data-value mono" id="calc-thetaC">-664.42</div>
+                    </div>
+                </div>
+
+                <!-- CARD: Bending Moment & Shear Result Table -->
+                <div class="card">
+                    <div class="card-title">五、各桿件端點內力結果</div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>桿件端點</th>
+                                    <th>端點彎矩 M (t-m)</th>
+                                    <th>端點剪力 V (t)</th>
+                                    <th>跨中最大彎矩 Mmax (t-m)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>頂版 AB (A 端 / 跨中)</td>
+                                    <td class="mono" id="val-MAB">-3.040</td>
+                                    <td class="mono" id="val-VAB">6.796</td>
+                                    <td class="mono" id="val-MmidAB">3.416</td>
+                                </tr>
+                                <tr>
+                                    <td>底版 CD (C 端 / 跨中)</td>
+                                    <td class="mono" id="val-MCD">-4.428</td>
+                                    <td class="mono" id="val-VCD">11.184</td>
+                                    <td class="mono" id="val-MmidCD">6.197</td>
+                                </tr>
+                                <tr>
+                                    <td>側牆 AC (A端頂 / C端底)</td>
+                                    <td class="mono" id="val-MAC">3.040 (頂) / -4.428 (底)</td>
+                                    <td class="mono" id="val-VAC">3.548 (頂) / 5.914 (底)</td>
+                                    <td class="mono" id="val-MmaxAC">0.909 <span style="font-size:0.75rem; color:var(--text-muted);">(x=1.99m)</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-warning" id="usd-note-box" style="display: none;">
+                        <span class="alert-icon">💡</span>
+                        <div>
+                            <strong>專業工程提示</strong>：原始 Excel 檔案的 USD 活頁簿中，在進行桿件內部剪力與彎矩分佈計算（Row 232、316 等）時，誤將載重 W1、W2 引用至 ASD 活頁簿 of values (未乘載重因數)。本程式已為您修正此項引用，使用正確的 USD 極限設計載重進行內力分佈計算，以確保結構安全。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD: Reinforcement Concrete Design Check -->
+                <div class="card">
+                    <div class="card-title">
+                        六、鋼筋混凝土配筋設計與安全檢核
+                        <span>寬度 b = 100 cm 斷面檢算</span>
+                    </div>
+
+                    <!-- Material specification input group -->
+                    <div style="background-color: #f8fafc; padding: 14px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border-color);">
+                        <div style="font-weight:600; font-size:0.9rem; margin-bottom:8px;">材料強度常數與保護層設定：</div>
+                        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:10px;">
+                            <div class="input-group">
+                                <label for="rebar-fc">混凝土 fc'</label>
+                                <div class="input-wrapper" style="font-size:0.8rem;">
+                                    <input type="number" id="rebar-fc" value="280" style="padding: 6px 20px 6px 8px; font-size:0.85rem;" oninput="triggerCalculation()">
+                                    <span class="input-unit" style="font-size:0.7rem; right:4px;">kg/cm²</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="rebar-fy">主鋼筋 fy</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="rebar-fy" value="4200" style="padding: 6px 20px 6px 8px; font-size:0.85rem;" oninput="triggerCalculation()">
+                                    <span class="input-unit" style="font-size:0.7rem; right:4px;">kg/cm²</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="rebar-cover">保護層 d'</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="rebar-cover" value="5" style="padding: 6px 20px 6px 8px; font-size:0.85rem;" oninput="triggerCalculation()">
+                                    <span class="input-unit" style="font-size:0.7rem; right:4px;">cm</span>
+                                </div>
+                            </div>
+                            <div class="input-group" id="group-rebar-n">
+                                <label for="rebar-n">彈性模數比 n</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="rebar-n" value="9" style="padding: 6px 20px 6px 8px; font-size:0.85rem;" oninput="triggerCalculation()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reinforcement verification table -->
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>檢核斷面 (1m 寬)</th>
+                                    <th>斷面厚 h</th>
+                                    <th>主筋規格</th>
+                                    <th>主筋間距 S</th>
+                                    <th>溫度鋼筋規格</th>
+                                    <th>溫度鋼筋間距 St</th>
+                                    <th>彎矩檢核 (Mu/Mn 或 應力)</th>
+                                    <th>剪力檢核</th>
+                                    <th>溫度鋼筋檢核</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Joint A (頂版端) -->
+                                <tr>
+                                    <td style="font-weight:600;">Joint A (頂版端部)</td>
+                                    <td class="mono" id="check-h-A">40 cm</td>
+                                    <td class="table-input">
+                                        <select id="rebar-size-A" onchange="triggerCalculation()"></select>
+                                    </td>
+                                    <td class="table-input">
+                                        <input type="number" id="rebar-sp-A" value="20" style="width:55px;" min="5" max="50" oninput="triggerCalculation()"> cm
+                                    </td>
+                                    <td class="table-input">
+                                        <select id="temp-size-A" onchange="triggerCalculation()"></select>
+                                    </td>
+                                    <td class="table-input">
+                                        <input type="number" id="temp-sp-A" value="20" style="width:55px;" min="5" max="50" oninput="triggerCalculation()"> cm
+                                    </td>
+                                    <td><span class="badge" id="check-M-badge-A">計算中</span></td>
+                                    <td><span class="badge" id="check-V-badge-A">計算中</span></td>
+                                    <td><span class="badge" id="check-T-badge-A">計算中</span></td>
+                                </tr>
+
+                                <!-- Joint C (底版端部) -->
+                                <tr>
+                                    <td style="font-weight:600;">Joint C (底版端部)</td>
+                                    <td class="mono" id="check-h-C">45 cm</td>
+                                    <td class="table-input">
+                                        <select id="rebar-size-C" onchange="triggerCalculation()"></select>
+                                    </td>
+                                    <td class="table-input">
+                                        <input type="number" id="rebar-sp-C" value="20" style="width:55px;" min="5" max="50" oninput="triggerCalculation()"> cm
+                                    </td>
+                                    <td class="table-input">
+                                        <select id="temp-size-C" onchange="triggerCalculation()"></select>
+                                    </td>
+                                    <td class="table-input">
+                                        <input type="number" id="temp-sp-C" value="20" style="width:55px;" min="5" max="50" oninput="triggerCalculation()"> cm
+                                    </td>
+                                    <td><span class="badge" id="check-M-badge-C">計算中</span></td>
+                                    <td><span class="badge" id="check-V-badge-C">計算中</span></td>
+                                    <td><span class="badge" id="check-T-badge-C">計算中</span></td>
+                                </tr>
+
+                                <!-- Span AB (頂版跨中) -->
+                                <tr>
+                                    <td style="font-weight:600;">頂版 (Span AB 跨中)</td>
+                                    <td class="mono" id="check-h-AB">40 cm</td>
+                                    <td class="table-input">
+                                        <select id="rebar-size-AB" onchange="triggerCalculation()"></select>
+                                    </td>
+                                    <td class="table-input">
+                                        <input type="number" id="rebar-sp-AB" value="20" style="width:55px;" min="5" max="50" oninput="triggerCalculation()"> cm
+                                    </td>
+                                    <td class="table-input">
+                                        <select id="temp-size-AB" onchange="triggerCalculation()"></select>
+                                    </td>
+                                    <td class="table-input">
+                                        <input type="number" id="temp-sp-AB" value="20" style="width:55px;" min="5" max="50" oninput="triggerCalculation()"> cm
+                                    </td>
+                                    <td><span class="badge" id="check-M-badge-AB">計算中</span></td>
+                                    <td><span class="badge" id="check-V-badge-AB">計算中</span></td>
+                                    <td><span class="badge" id="check-T-badge-AB">計算中</span></td>
+                                </tr>
+
+                                <!-- Span CD (底版跨中) -->
+                                <tr>
+                                    <td style="font-weight:600;">底版 (Span CD 跨中)</td>
+                                    <td class="mono" id="check-h-CD">45 cm</td>
+                                    <td class="table-input">
+                                        <select id="rebar-size-CD" onchange="triggerCalculation()"></select>
+                                    </td>
+                                    <td class="table-input">
+                                        <input type="number" id="rebar-sp-CD" value="20" style="width:55px;" min="5" max="50" oninput="triggerCalculation()"> cm
+                                    </td>
+                                    <td class="table-input">
+                                        <select id="temp-size-CD" onchange="triggerCalculation()"></select>
+                                    </td>
+                                    <td class="table-input">
+                                        <input type="number" id="temp-sp-CD" value="20" style="width:55px;" min="5" max="50" oninput="triggerCalculation()"> cm
+                                    </td>
+                                    <td><span class="badge" id="check-M-badge-CD">計算中</span></td>
+                                    <td><span class="badge" id="check-V-badge-CD">計算中</span></td>
+                                    <td><span class="badge" id="check-T-badge-CD">計算中</span></td>
+                                </tr>
+
+                                <!-- Wall AC (側牆正彎矩) -->
+                                <tr>
+                                    <td style="font-weight:600;">側牆 (Wall AC 跨中)</td>
+                                    <td class="mono" id="check-h-AC">30 cm</td>
+                                    <td class="table-input">
+                                        <select id="rebar-size-AC" onchange="triggerCalculation()"></select>
+                                    </td>
+                                    <td class="table-input">
+                                        <input type="number" id="rebar-sp-AC" value="20" style="width:55px;" min="5" max="50" oninput="triggerCalculation()"> cm
+                                    </td>
+                                    <td class="table-input">
+                                        <select id="temp-size-AC" onchange="triggerCalculation()"></select>
+                                    </td>
+                                    <td class="table-input">
+                                        <input type="number" id="temp-sp-AC" value="20" style="width:55px;" min="5" max="50" oninput="triggerCalculation()"> cm
+                                    </td>
+                                    <td><span class="badge" id="check-M-badge-AC">計算中</span></td>
+                                    <td><span class="badge" id="check-V-badge-AC">計算中</span></td>
+                                    <td><span class="badge" id="check-T-badge-AC">計算中</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD: Dynamic Detail Moment & Shear distribution (Collapsible) -->
+                <div class="card">
+                    <div class="collapsible-header" onclick="toggleDetails()">
+                        <div style="font-weight: 600; font-size: 1.05rem;">七、桿件沿線斷面內力分佈明細 (0 至 L)</div>
+                        <div class="arrow-icon" id="detail-arrow">▶</div>
+                    </div>
+                    <div class="collapsible-content" id="detail-section">
+                        <div style="margin-top: 10px;">
+                            <div style="font-weight: 500; margin-bottom: 8px;">1. 頂版 AB 桿件彎矩沿線分佈 (跨度 B = <span id="lbl-span-B1">3.80</span> m)</div>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>位置</th>
+                                            <th>0 (A端)</th>
+                                            <th>B/8</th>
+                                            <th>B/4</th>
+                                            <th>3B/8</th>
+                                            <th>B/2 (跨中)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr id="row-ab-x">
+                                            <td>座標 x (m)</td>
+                                            <td class="mono">0.00</td>
+                                            <td class="mono">0.48</td>
+                                            <td class="mono">0.95</td>
+                                            <td class="mono">1.43</td>
+                                            <td class="mono">1.90</td>
+                                        </tr>
+                                        <tr id="row-ab-m">
+                                            <td>彎矩 M (t-m)</td>
+                                            <td class="mono">-3.04</td>
+                                            <td class="mono">-0.22</td>
+                                            <td class="mono">1.80</td>
+                                            <td class="mono">3.01</td>
+                                            <td class="mono">3.42</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div style="font-weight: 500; margin-top: 16px; margin-bottom: 8px;">2. 側牆 AC 桿件彎矩沿線分佈 (高度 D = <span id="lbl-span-D1">3.925</span> m)</div>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>位置</th>
+                                            <th>0 (A端頂)</th>
+                                            <th>D/8</th>
+                                            <th>D/4</th>
+                                            <th>3D/8</th>
+                                            <th>D/2</th>
+                                            <th>5D/8</th>
+                                            <th>3D/4</th>
+                                            <th>7D/8</th>
+                                            <th>D (C端底)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr id="row-ac-x">
+                                            <td>座標 y (m)</td>
+                                            <td class="mono">0.00</td>
+                                            <td class="mono">0.49</td>
+                                            <td class="mono">0.98</td>
+                                            <td class="mono">1.47</td>
+                                            <td class="mono">1.96</td>
+                                            <td class="mono">2.45</td>
+                                            <td class="mono">2.94</td>
+                                            <td class="mono">3.43</td>
+                                            <td class="mono">3.93</td>
+                                        </tr>
+                                        <tr id="row-ac-m">
+                                            <td>彎矩 M (t-m)</td>
+                                            <td class="mono">-3.04</td>
+                                            <td class="mono">-1.45</td>
+                                            <td class="mono">-0.21</td>
+                                            <td class="mono">0.60</td>
+                                            <td class="mono">0.91</td>
+                                            <td class="mono">0.64</td>
+                                            <td class="mono">-0.29</td>
+                                            <td class="mono">-1.96</td>
+                                            <td class="mono">-4.43</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div style="font-weight: 500; margin-top: 16px; margin-bottom: 8px;">3. 底版 CD 桿件彎矩沿線分佈 (跨度 B = <span id="lbl-span-B2">3.80</span> m)</div>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>位置</th>
+                                            <th>0 (C端)</th>
+                                            <th>B/8</th>
+                                            <th>B/4</th>
+                                            <th>3B/8</th>
+                                            <th>B/2 (跨中)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr id="row-cd-x">
+                                            <td>座標 x (m)</td>
+                                            <td class="mono">0.00</td>
+                                            <td class="mono">0.48</td>
+                                            <td class="mono">0.95</td>
+                                            <td class="mono">1.43</td>
+                                            <td class="mono">1.90</td>
+                                        </tr>
+                                        <tr id="row-cd-m">
+                                            <td>彎矩 M (t-m)</td>
+                                            <td class="mono">-4.43</td>
+                                            <td class="mono">0.22</td>
+                                            <td class="mono">3.54</td>
+                                            <td class="mono">5.53</td>
+                                            <td class="mono">6.20</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD: Engineering Info -->
+                <div class="card" style="background-color: #f8fafc;">
+                    <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; color: var(--text-main);">力學分析與符號說明：</div>
+                    <ul style="padding-left: 20px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                        <li><strong>端點彎矩符號規定</strong>：計算書力矩以節點外側拉力為正（即頂底版外側受拉，或側版外側受拉）。在桿端力學模型中，負值代指節點內側受拉。</li>
+                        <li><strong>配筋強度檢核標準</strong>：
+                            <ul>
+                                <li><strong>ASD 模式</strong>：檢算斷面最大工作壓應力 $\sigma_c \le 0.4 f'_c$ (fc OK!) 且拉應力 $\sigma_s \le 0.4 f_y$ (fs OK!)，及剪應力 $\tau_c \le 0.53\sqrt{f'_c}$。</li>
+                                <li><strong>USD 模式</strong>：檢算設計極限彎矩強度 $\phi M_n \ge M_u$ (彎矩 OK!)，及極限剪力強度 $\phi V_c \ge V_u$ (剪力 OK!)。</li>
+                            </ul>
+                        </li>
+                        <li><strong>節點平衡驗證</strong>：
+                            <ul>
+                                <li>節點 A：M_AB + M_AC = 0 (平衡狀況：<span id="chk-jointA" style="font-weight:600;">計算中</span>)</li>
+                                <li>節點 C：M_CA + M_CD = 0 (平衡狀況：<span id="chk-jointC" style="font-weight:600;">計算中</span>)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER SECTION -->
+        <footer>
+            <p>© 2026 版權所有 製作者：劉哲旻</p>
+        </footer>
+    </div>
+
+    <!-- CORE JAVASCRIPT LOGIC -->
+    <script>
+        // Global Error Overlay
+        window.onerror = function(message, source, lineno, colno, error) {
+            const errDiv = document.getElementById('error-console');
+            if (errDiv) {
+                errDiv.style.display = 'block';
+                errDiv.innerHTML = `<strong>瀏覽器 JavaScript 執行錯誤：</strong><br>${message}<br>位置：${source}:${lineno}:${colno}<br>${error ? error.stack.replace(/\n/g, '<br>') : ''}`;
+            }
+            return false;
+        };
+
+        // Rebar database
+        const REBAR_DB = {
+            10: { name: "#3 (D10)", code: "D10", area: 0.7133, dia: 0.953 },
+            13: { name: "#4 (D13)", code: "D13", area: 1.267,  dia: 1.27 },
+            16: { name: "#5 (D16)", code: "D16", area: 1.986,  dia: 1.59 },
+            19: { name: "#6 (D19)", code: "D19", area: 2.865,  dia: 1.91 },
+            22: { name: "#7 (D22)", code: "D22", area: 3.871,  dia: 2.22 },
+            25: { name: "#8 (D25)", code: "D25", area: 5.067,  dia: 2.54 },
+            29: { name: "#9 (D29)", code: "D29", area: 6.469,  dia: 2.87 },
+            32: { name: "#10 (D32)", code: "D32", area: 8.143, dia: 3.22 },
+            36: { name: "#11 (D36)", code: "D36", area: 10.07,  dia: 3.58 }
+        };
+
+        // Global State Variables
+        let currentMethod = 'ASD'; // 'ASD' or 'USD'
+        const sections = ['A', 'AB', 'C', 'CD', 'AC'];
+
+        // Constants
+        const CONCRETE_DENSITY = 2.4; // 混凝土單位重 t/m3
+        const WATER_DENSITY = 1.0;    // 水單位重 t/m3
+
+        // DOM elements
+        const btnAsd = document.getElementById('btn-asd');
+        const btnUsd = document.getElementById('btn-usd');
+        const currentMethodLbl = document.getElementById('current-method-lbl');
+        const factorsDesc = document.getElementById('factors-desc');
+        const trafficSelect = document.getElementById('traffic-select');
+        const usdNoteBox = document.getElementById('usd-note-box');
+
+        // Inputs DOM
+        const inBi = document.getElementById('input-Bi');
+        const inDi = document.getElementById('input-Di');
+        const inTu = document.getElementById('input-Tu');
+        const inTd = document.getElementById('input-Td');
+        const inTb = document.getElementById('input-Tb');
+        const inHe = document.getElementById('input-He');
+        const inZ1 = document.getElementById('input-z1');
+        const inGamma = document.getElementById('input-gamma');
+        const inGammaSat = document.getElementById('input-gammasat');
+        const inPhi = document.getElementById('input-phi');
+        const inQ = document.getElementById('input-q');
+
+        // Material specification DOM
+        const rebFc = document.getElementById('rebar-fc');
+        const rebFy = document.getElementById('rebar-fy');
+        const rebCover = document.getElementById('rebar-cover');
+        const rebN = document.getElementById('rebar-n');
+        const groupN = document.getElementById('group-rebar-n');
+
+        // Build rebar dropdowns
+        function initRebarDropdowns() {
+            sections.forEach(sec => {
+                const selectMain = document.getElementById(`rebar-size-${sec}`);
+                const selectTemp = document.getElementById(`temp-size-${sec}`);
+                selectMain.innerHTML = '';
+                selectTemp.innerHTML = '';
+                
+                Object.keys(REBAR_DB).forEach(key => {
+                    const opt1 = document.createElement('option');
+                    opt1.value = key;
+                    opt1.textContent = REBAR_DB[key].name;
+                    selectMain.appendChild(opt1);
+
+                    const opt2 = document.createElement('option');
+                    opt2.value = key;
+                    opt2.textContent = REBAR_DB[key].name;
+                    selectTemp.appendChild(opt2);
+                });
+
+                // Set default selected values based on ASD preset data
+                if (sec === 'A') {
+                    selectMain.value = "19"; // D19
+                    selectTemp.value = "13"; // D13
+                } else if (sec === 'C') {
+                    selectMain.value = "19"; // D19
+                    selectTemp.value = "13"; // D13
+                } else if (sec === 'AB') {
+                    selectMain.value = "16"; // D16
+                    selectTemp.value = "13"; // D13
+                } else if (sec === 'CD') {
+                    selectMain.value = "25"; // D25
+                    selectTemp.value = "16"; // D16
+                } else if (sec === 'AC') {
+                    selectMain.value = "16"; // D16
+                    selectTemp.value = "16"; // D16
+                }
+            });
+        }
+
+
+
+        // Set Design Method
+        function setDesignMethod(method) {
+            currentMethod = method;
+            if (method === 'ASD') {
+                btnAsd.classList.add('active');
+                btnUsd.classList.remove('active');
+                currentMethodLbl.textContent = '當前：ASD 容許應力法';
+                factorsDesc.innerHTML = `靜載重因數 γDL = 1.00<br>土壓力因數 γH = 1.00<br>水壓力因數 γH = 1.00`;
+                usdNoteBox.style.display = 'none';
+                groupN.style.display = 'flex';
+            } else {
+                btnUsd.classList.add('active');
+                btnAsd.classList.remove('active');
+                currentMethodLbl.textContent = '當前：USD 極限強度法';
+                factorsDesc.innerHTML = `靜載重因數 γDL = 1.20<br>土壓力因數 γH = 1.60<br>水壓力因數 γH = 1.60`;
+                usdNoteBox.style.display = 'block';
+                groupN.style.display = 'none';
+            }
+            triggerCalculation();
+        }
+
+        // Trigger calculation sequence
+        function triggerCalculation() {
+            const results = performCalculations();
+            updateOutputs(results);
+            verifyReinforcement(results);
+            drawDiagram(results);
+            drawRebarDiagram(results);
+        }
+
+        // Core calculation engine
+        function performCalculations() {
+            const Bi = Math.max(0.1, parseFloat(inBi.value) || 0);
+            const Di = Math.max(0.1, parseFloat(inDi.value) || 0);
+            const Tu = Math.max(0.05, parseFloat(inTu.value) || 0);
+            const Td = Math.max(0.05, parseFloat(inTd.value) || 0);
+            const Tb = Math.max(0.05, parseFloat(inTb.value) || 0);
+
+            const He = Math.max(0, parseFloat(inHe.value) || 0);
+            const z1 = Math.max(0, parseFloat(inZ1.value) || 0);
+            const gamma = Math.max(0.1, parseFloat(inGamma.value) || 0);
+            const gammaSat = Math.max(0.1, parseFloat(inGammaSat.value) || 0);
+            const phi = Math.max(0, Math.min(89, parseFloat(inPhi.value) || 0));
+            const q = Math.max(0, parseFloat(inQ.value) || 0);
+            
+            const trafficType = trafficSelect.value;
+
+            // Load Factors
+            let gDL = 1.0;
+            let gH = 1.0;
+            let gLL = 1.0;
+            if (currentMethod === 'USD') {
+                gDL = 1.2;
+                gH = 1.6;
+                gLL = 1.6;
+            }
+
+            // Dimensions
+            const Bo = Bi + 2 * Tb;
+            const Do = Di + Tu + Td;
+            const B = Bi + Tb;
+            const D = Di + Tu / 2 + Td / 2;
+            const L = Bi;
+
+            // Earth coefficient
+            const gammaSub = gammaSat - 1.0;
+            const Ka = Math.pow(Math.tan((45 - phi / 2) * Math.PI / 180), 2);
+
+            // Equivalent live load surcharge
+            let qLL = 0;
+            if (trafficType === 'H20' || trafficType === 'H15') {
+                const factor = (trafficType === 'H20') ? 1.0 : 0.75;
+                const impact = Math.min(0.3, 15.24 / (Bi + 38.1));
+                const ML = 1340 * Bi * factor;
+                qLL = (ML * (1 + impact)) / 1000;
+            } else {
+                qLL = q;
+            }
+
+            // Ground water heights
+            const z2 = He - z1;
+            const z3 = He + Do - z1;
+
+            // Pressures
+            let sz1 = 0;
+            if (z1 > He) {
+                sz1 = He * gamma + qLL;
+            } else {
+                sz1 = z1 * gamma + (He - z1) * gammaSub + qLL;
+            }
+
+            const sz2 = (z1 < He) ? (He - z1) : 0;
+            const sz3 = Tu * CONCRETE_DENSITY;
+            const sz4 = ((Bo * Do - Bi * Di) * CONCRETE_DENSITY) / Bo;
+
+            // Factored loads
+            const W1 = gH * sz1 + gH * sz2 + gDL * sz3;
+            const W2 = gH * sz1 + gH * sz2 + gDL * sz4;
+
+            // Lateral loads (factored)
+            let P1_raw = (z2 < 0) ? (sz1 * Ka) : (sz1 * Ka + z2);
+            let P2_raw = (z2 < 0) ? (P1_raw + gammaSub * Do * Ka + Math.max(0, z3)) : (P1_raw + gammaSub * Do * Ka + Do);
+            
+            const P1 = gH * P1_raw;
+            const P2 = gH * P2_raw;
+
+            // Relative member stiffness (assume unit width b=1.0m)
+            const K_AB = Math.pow(Tu, 3) / (12 * B);
+            const K_AC = Math.pow(Tb, 3) / (12 * D);
+            const K_CD = Math.pow(Td, 3) / (12 * B);
+
+            // Fixed End Moments (FEM)
+            const FAB = - W1 * B * B / 12;
+            const FAC = (P1 / 20 + P2 / 30) * D * D;
+            const FCA = - (P1 / 30 + P2 / 20) * D * D;
+            const FCD = W2 * B * B / 12;
+
+            // Matrices Solver (2x2 balance equations)
+            const a11 = 2 * K_AB + 4 * K_AC;
+            const a12 = 2 * K_AC;
+            const a21 = 2 * K_AC;
+            const a22 = 2 * K_CD + 4 * K_AC;
+            const c1 = FAB + FAC;
+            const c2 = FCA + FCD;
+
+            const det = a11 * a22 - a12 * a21;
+            let thetaA = 0;
+            let thetaC = 0;
+            if (Math.abs(det) > 1e-12) {
+                thetaA = (-c1 * a22 - (-c2) * a12) / det;
+                thetaC = (a11 * (-c2) - a21 * (-c1)) / det;
+            }
+
+            // Member End Moments (t-m)
+            const M_AB = 2 * K_AB * thetaA + FAB;
+            const M_AC = 2 * K_AC * (2 * thetaA + thetaC) + FAC;
+            const M_CA = 2 * K_AC * (2 * thetaC + thetaA) + FCA;
+            const M_CD = 2 * K_CD * thetaC + FCD;
+
+            // Shear force calculations
+            const V_AB = W1 * B / 2;
+            const Mmid_AB = (W1 * B * B) / 8 + M_AB;
+
+            const V_CD = W2 * B / 2;
+            const Mmid_CD = (W2 * B * B) / 8 + M_CD;
+
+            const R_prime_A = (P1 / 3 + P2 / 6) * D;
+            const R_prime_C = (P1 / 6 + P2 / 3) * D;
+            
+            const V_AC_A = R_prime_A - (M_AC - M_CA) / D;
+            const V_AC_C = R_prime_C - (M_CA - M_AC) / D;
+
+            // Resolve max wall moment
+            const eq_a = V_AC_A;
+            const eq_b = P1 / 2;
+            const eq_c = (P2 - P1) / (6 * D);
+            
+            let xm = 0;
+            if (Math.abs(eq_c) < 1e-12) {
+                xm = eq_a / (2 * eq_b);
+            } else {
+                const sqVal = eq_b * eq_b + 3 * eq_c * eq_a;
+                if (sqVal >= 0) {
+                    xm = (-eq_b + Math.sqrt(sqVal)) / (3 * eq_c);
+                } else {
+                    xm = D / 2;
+                }
+            }
+            const Mmax_AC = eq_a * xm - eq_b * xm * xm - eq_c * xm * xm * xm + M_AC;
+
+            // Discretized bending moments for collapsible section
+            const ab_x = [];
+            const ab_m = [];
+            for (let i = 0; i <= 4; i++) {
+                const x = (B / 4) * i;
+                const m = V_AB * x - (W1 * x * x) / 2 + M_AB;
+                ab_x.push(x);
+                ab_m.push(m);
+            }
+
+            const cd_x = [];
+            const cd_m = [];
+            for (let i = 0; i <= 4; i++) {
+                const x = (B / 4) * i;
+                const m = V_CD * x - (W2 * x * x) / 2 + M_CD;
+                cd_x.push(x);
+                cd_m.push(m);
+            }
+
+            const ac_y = [];
+            const ac_m = [];
+            for (let i = 0; i <= 8; i++) {
+                const y = (D / 8) * i;
+                const m = V_AC_A * y - (P1 * y * y) / 2 - ((P2 - P1) * y * y * y) / (6 * D) + M_AC;
+                ac_y.push(y);
+                ac_m.push(m);
+            }
+
+            return {
+                Bi, Di, Tu, Td, Tb, He, z1, gamma, gammaSat, phi, q,
+                Bo, Do, B, D, Ka, gammaSub, qLL, W1, W2, P1, P2,
+                K_AB, K_AC, K_CD, FAB, FAC, FCA, FCD,
+                thetaA, thetaC, M_AB, M_AC, M_CA, M_CD,
+                V_AB, Mmid_AB, V_CD, Mmid_CD,
+                V_AC_A, V_AC_C, xm, Mmax_AC,
+                ab_x, ab_m, cd_x, cd_m, ac_y, ac_m
+            };
+        }
+
+        // Render basic values to screen
+        function updateOutputs(res) {
+            // General
+            document.getElementById('calc-BoDo').textContent = `${res.Bo.toFixed(3)} m / ${res.Do.toFixed(3)} m`;
+            document.getElementById('calc-BD').textContent = `${res.B.toFixed(3)} m / ${res.D.toFixed(3)} m`;
+            document.getElementById('calc-Ka').textContent = res.Ka.toFixed(4);
+            document.getElementById('calc-gammasub').textContent = `${res.gammaSub.toFixed(2)} t/m³`;
+            document.getElementById('calc-qll').textContent = `${res.qLL.toFixed(3)} t/m²`;
+            document.getElementById('calc-W1').textContent = `${res.W1.toFixed(3)} t/m`;
+            document.getElementById('calc-W2').textContent = `${res.W2.toFixed(3)} t/m`;
+            document.getElementById('calc-P1P2').textContent = `${res.P1.toFixed(3)} t/m / ${res.P2.toFixed(3)} t/m`;
+
+            // FEM
+            document.getElementById('calc-FAB').textContent = `${res.FAB.toFixed(3)} t-m`;
+            document.getElementById('calc-FAC').textContent = `${res.FAC.toFixed(3)} t-m`;
+            document.getElementById('calc-FCA').textContent = `${res.FCA.toFixed(3)} t-m`;
+            document.getElementById('calc-FCD').textContent = `${res.FCD.toFixed(3)} t-m`;
+            document.getElementById('calc-Kratio').textContent = `${res.K_AB.toFixed(5)} / ${res.K_AC.toFixed(5)} / ${res.K_CD.toFixed(5)}`;
+            document.getElementById('calc-thetaA').textContent = res.thetaA.toFixed(2);
+            document.getElementById('calc-thetaC').textContent = res.thetaC.toFixed(2);
+
+            // Tables
+            document.getElementById('val-MAB').textContent = res.M_AB.toFixed(3);
+            document.getElementById('val-VAB').textContent = res.V_AB.toFixed(3);
+            document.getElementById('val-MmidAB').textContent = res.Mmid_AB.toFixed(3);
+
+            document.getElementById('val-MCD').textContent = res.M_CD.toFixed(3);
+            document.getElementById('val-VCD').textContent = res.V_CD.toFixed(3);
+            document.getElementById('val-MmidCD').textContent = res.Mmid_CD.toFixed(3);
+
+            document.getElementById('val-MAC').innerHTML = `<span class="pill pill-blue">頂</span> ${res.M_AC.toFixed(3)}<br><span class="pill pill-orange">底</span> ${res.M_CA.toFixed(3)}`;
+            document.getElementById('val-VAC').innerHTML = `<span class="pill pill-blue">頂</span> ${res.V_AC_A.toFixed(3)}<br><span class="pill pill-orange">底</span> ${res.V_AC_C.toFixed(3)}`;
+            document.getElementById('val-MmaxAC').innerHTML = `${res.Mmax_AC.toFixed(3)} <span style="font-size:0.75rem; color:var(--text-muted);">(y=${res.xm.toFixed(2)}m)</span>`;
+
+            // Joint Sum checks
+            const sumA = Math.abs(res.M_AB + res.M_AC);
+            const sumC = Math.abs(res.M_CA + res.M_CD);
+            const chkA = document.getElementById('chk-jointA');
+            const chkC = document.getElementById('chk-jointC');
+
+            if (chkA) {
+                chkA.textContent = (sumA < 1e-4) ? "OK (ΣM = 0.000)" : `NG (ΣM = ${(res.M_AB + res.M_AC).toFixed(4)})`;
+                chkA.style.color = (sumA < 1e-4) ? "var(--success)" : "var(--danger)";
+            }
+
+            if (chkC) {
+                chkC.textContent = (sumC < 1e-4) ? "OK (ΣM = 0.000)" : `NG (ΣM = ${(res.M_CA + res.M_CD).toFixed(4)})`;
+                chkC.style.color = (sumC < 1e-4) ? "var(--success)" : "var(--danger)";
+            }
+
+            document.getElementById('lbl-span-B1').textContent = res.B.toFixed(3);
+            document.getElementById('lbl-span-B2').textContent = res.B.toFixed(3);
+            document.getElementById('lbl-span-D1').textContent = res.D.toFixed(3);
+
+            // Detail elements populate
+            document.getElementById('row-ab-x').innerHTML = `<td>座標 x (m)</td>` + res.ab_x.map(x => `<td class="mono">${x.toFixed(3)}</td>`).join('');
+            document.getElementById('row-ab-m').innerHTML = `<td>彎矩 M (t-m)</td>` + res.ab_m.map(m => `<td class="mono">${m.toFixed(3)}</td>`).join('');
+
+            document.getElementById('row-cd-x').innerHTML = `<td>座標 x (m)</td>` + res.cd_x.map(x => `<td class="mono">${x.toFixed(3)}</td>`).join('');
+            document.getElementById('row-cd-m').innerHTML = `<td>彎矩 M (t-m)</td>` + res.cd_m.map(m => `<td class="mono">${m.toFixed(3)}</td>`).join('');
+
+            document.getElementById('row-ac-x').innerHTML = `<td>座標 y (m)</td>` + res.ac_y.map(y => `<td class="mono">${y.toFixed(3)}</td>`).join('');
+            document.getElementById('row-ac-m').innerHTML = `<td>彎矩 M (t-m)</td>` + res.ac_m.map(m => `<td class="mono">${m.toFixed(3)}</td>`).join('');
+        }
+
+        // Concrete Reinforcement Verification Logic
+        function verifyReinforcement(res) {
+            // Material properties
+            const fc = Math.max(1, parseFloat(rebFc.value) || 280);
+            const fy = Math.max(1, parseFloat(rebFy.value) || 4200);
+            const cover = Math.max(0, parseFloat(rebCover.value) || 5);
+            const n = Math.max(1, parseFloat(rebN.value) || 9);
+
+            const b = 100; // unit design width (cm)
+
+            // Section thickness mappings
+            document.getElementById('check-h-A').textContent = `${(res.Tu * 100).toFixed(0)} cm`;
+            document.getElementById('check-h-AB').textContent = `${(res.Tu * 100).toFixed(0)} cm`;
+            document.getElementById('check-h-C').textContent = `${(res.Td * 100).toFixed(0)} cm`;
+            document.getElementById('check-h-CD').textContent = `${(res.Td * 100).toFixed(0)} cm`;
+            document.getElementById('check-h-AC').textContent = `${(res.Tb * 100).toFixed(0)} cm`;
+
+            const sectionData = {
+                'A':  { M: Math.abs(res.M_AB), V: Math.abs(res.V_AB), h: res.Tu * 100 },
+                'AB': { M: Math.abs(res.Mmid_AB), V: Math.abs(res.V_AB), h: res.Tu * 100 },
+                'C':  { M: Math.abs(res.M_CD), V: Math.abs(res.V_CD), h: res.Td * 100 },
+                'CD': { M: Math.abs(res.Mmid_CD), V: Math.abs(res.V_CD), h: res.Td * 100 },
+                'AC': { M: Math.abs(res.Mmax_AC), V: Math.max(Math.abs(res.V_AC_A), Math.abs(res.V_AC_C)), h: res.Tb * 100 }
+            };
+
+            sections.forEach(sec => {
+                const data = sectionData[sec];
+                const M_kgcm = data.M * 100000;
+                const V_kg = data.V * 1000;
+                const h = data.h;
+                
+                // Read chosen rebar size and spacing
+                const rebarId = parseInt(document.getElementById(`rebar-size-${sec}`).value);
+                const spacing = Math.max(1, parseFloat(document.getElementById(`rebar-sp-${sec}`).value) || 20);
+
+                const tempId = parseInt(document.getElementById(`temp-size-${sec}`).value);
+                const tempSp = Math.max(1, parseFloat(document.getElementById(`temp-sp-${sec}`).value) || 20);
+
+                const mainRebar = REBAR_DB[rebarId];
+                const tempRebar = REBAR_DB[tempId];
+
+                // Safety guard to prevent reference error on load
+                if (!mainRebar || !tempRebar) return;
+
+                // Effective depth d
+                const d = Math.max(0.1, h - cover); 
+                
+                // Actual provided main steel area As (cm2/m)
+                const As_prov = (mainRebar.area * 100) / spacing;
+                // Actual provided temperature steel area At (cm2/m)
+                const At_prov = (tempRebar.area * 100) / tempSp;
+
+                // necessary shrinkage rebar area req (0.002 * b * h_avg)
+                const At_req = 0.002 * b * (d + (h - cover - 0.5 * mainRebar.dia)) / 2;
+
+                let mPass = false;
+                let vPass = false;
+                let tPass = false;
+
+                let mLabel = '';
+                let vLabel = '';
+                let tLabel = '';
+
+                if (currentMethod === 'ASD') {
+                    // Working Stress Design Method
+                    // 1. Structural depth requirement (d_req = sqrt(M / Kb))
+                    // K = fc * j * k / 2
+                    // Assume preset structural design factors from Excel: k_d = 0.375, j_d = 0.875
+                    const fc_allow = 0.4 * fc;
+                    const fs_allow = 0.4 * fy;
+                    const K_coeff = (fc_allow * 0.875 * 0.375) / 2;
+                    const d_req = Math.sqrt(M_kgcm / (K_coeff * b));
+
+                    // 2. Concrete/Steel stresses
+                    const rho = As_prov / (b * d);
+                    const k = Math.sqrt(2 * rho * n + Math.pow(rho * n, 2)) - rho * n;
+                    const j = 1 - k / 3;
+
+                    const C_factor = 6 / (3 * k - k * k);
+                    const S_factor = C_factor * (1 - k) / k;
+
+                    const sigma_c = (M_kgcm * C_factor) / (b * d * d);
+                    const sigma_s = (M_kgcm * S_factor * n) / (b * d * d);
+
+                    mPass = (sigma_c <= fc_allow && sigma_s <= fs_allow && d >= d_req);
+                    mLabel = mPass ? `OK (σc=${sigma_c.toFixed(0)}, σs=${sigma_s.toFixed(0)})` : `NG (σc=${sigma_c.toFixed(0)}, σs=${sigma_s.toFixed(0)})`;
+
+                    // 3. Shear stress
+                    const tau_c = V_kg / (b * d);
+                    const vc_allow = 0.53 * Math.sqrt(fc);
+                    vPass = (tau_c <= vc_allow);
+                    vLabel = vPass ? `OK (τ=${tau_c.toFixed(1)}<${vc_allow.toFixed(1)})` : `NG (τ=${tau_c.toFixed(1)}>${vc_allow.toFixed(1)})`;
+
+                } else {
+                    // Ultimate Strength Design Method (USD)
+                    // 1. Necessary steel ratio (rho)
+                    const phi = 0.9;
+                    const Rn = M_kgcm / (phi * b * d * d);
+                    
+                    let rho = 0;
+                    const radical = 1 - (2 * Rn) / (0.85 * fc);
+                    if (radical >= 0) {
+                        rho = (0.85 * fc / fy) * (1 - Math.sqrt(radical));
+                    }
+                    
+                    // Min & Max steel limits
+                    const rho_min = 14 / fy;
+                    const beta1 = 0.85; // for fc' <= 280
+                    const rho_b = 0.85 * beta1 * (fc / fy) * (6120 / (6120 + fy));
+                    const rho_max = 0.75 * rho_b;
+
+                    const rho_design = Math.min(Math.max(rho, rho_min), rho_max);
+                    const As_req = rho_design * b * d;
+
+                    // Concrete nominal flexural capacity phiMn
+                    const a_block = (As_prov * fy) / (0.85 * fc * b);
+                    const phiMn = phi * As_prov * fy * (d - a_block / 2);
+
+                    mPass = (As_prov >= As_req && phiMn >= M_kgcm);
+                    mLabel = mPass ? `OK (Mn=${(phiMn/100000).toFixed(1)}t-m)` : `NG (Mn=${(phiMn/100000).toFixed(1)}t-m)`;
+
+                    // 2. Concrete nominal shear capacity phiVc
+                    const phi_v = 0.75;
+                    const Vc = 0.53 * Math.sqrt(fc) * b * d;
+                    const phiVc = phi_v * Vc;
+                    vPass = (V_kg <= phiVc);
+                    vLabel = vPass ? `OK (Vn=${(phiVc/1000).toFixed(1)}t)` : `NG (Vn=${(phiVc/1000).toFixed(1)}t)`;
+                }
+
+                // 4. Shrinkage/Temp rebar check
+                tPass = (At_prov >= At_req);
+                tLabel = tPass ? `OK (${At_prov.toFixed(2)}>${At_req.toFixed(2)} cm²)` : `NG (${At_prov.toFixed(2)}<${At_req.toFixed(2)} cm²)`;
+
+                // Update badge UI
+                const mBadge = document.getElementById(`check-M-badge-${sec}`);
+                if (mBadge) {
+                    mBadge.textContent = mPass ? "OK" : "NG";
+                    mBadge.className = `badge ${mPass ? 'badge-ok' : 'badge-ng'}`;
+                    mBadge.title = mLabel;
+                }
+
+                const vBadge = document.getElementById(`check-V-badge-${sec}`);
+                if (vBadge) {
+                    vBadge.textContent = vPass ? "OK" : "NG";
+                    vBadge.className = `badge ${vPass ? 'badge-ok' : 'badge-ng'}`;
+                    vBadge.title = vLabel;
+                }
+
+                const tBadge = document.getElementById(`check-T-badge-${sec}`);
+                if (tBadge) {
+                    tBadge.textContent = tPass ? "OK" : "NG";
+                    tBadge.className = `badge ${tPass ? 'badge-ok' : 'badge-ng'}`;
+                    tBadge.title = tLabel;
+                }
+            });
+        }
+
+        // Dynamic Canvas Drawing
+        function drawDiagram(res) {
+            const canvas = document.getElementById('structureCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            
+            // Theme colors
+            const canvasBg = isDark ? '#151f32' : '#f8fafc';
+            const textMain = isDark ? '#f8fafc' : '#0f172a';
+            const textMuted = isDark ? '#cbd5e1' : '#475569';
+            const concreteBg = isDark ? '#27354a' : '#cbd5e1';
+            const innerHoleBg = isDark ? '#151f32' : '#ffffff';
+            const outlineStroke = isDark ? '#475569' : '#475569';
+            const dimLine = isDark ? '#5c7290' : '#64748b';
+            const dimText = isDark ? '#cbd5e1' : '#475569';
+            const soilBg = isDark ? 'rgba(217, 119, 6, 0.15)' : 'rgba(217, 119, 6, 0.08)';
+            const soilLine = isDark ? '#f97316' : '#d97706';
+            const soilText = isDark ? '#fdba74' : '#b45309';
+            const waterBg = isDark ? 'rgba(59, 130, 246, 0.18)' : 'rgba(37, 99, 235, 0.08)';
+            const waterLine = isDark ? '#60a5fa' : '#2563eb';
+            const waterText = isDark ? '#93c5fd' : '#1d4ed8';
+            const centerLineColor = isDark ? '#5c7290' : '#94a3b8';
+            const nodeDotColor = isDark ? '#cbd5e1' : '#334155';
+            const mainRebarColor = isDark ? '#f87171' : '#ef4444';
+            const mainRebarShadow = isDark ? 'rgba(248, 113, 113, 0.4)' : 'rgba(239, 68, 68, 0.4)';
+            
+            // Clean
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const padding = 100;
+            const drawW = canvas.width - 2 * padding;
+            const drawH = canvas.height - 2 * padding;
+
+            const marginSize = 0.5; 
+            const virtualW = res.Bo + 2 * marginSize;
+            const virtualH = res.Do + 2 * marginSize;
+
+            const scale = Math.min(drawW / virtualW, drawH / virtualH);
+
+            const canvasCenterX = canvas.width / 2;
+            const canvasCenterY = canvas.height / 2;
+
+            const mapX = (vx) => canvasCenterX + (vx - res.Bo / 2) * scale;
+            const mapY = (vy) => canvasCenterY + (vy - res.Do / 2) * scale;
+
+            // 1. Soil Background
+            ctx.fillStyle = canvasBg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Draw Soil Level
+            const groundY = mapY(-res.He);
+            const topBoxY = mapY(0);
+            if (res.He > 0) {
+                ctx.fillStyle = soilBg; 
+                ctx.fillRect(0, groundY, canvas.width, topBoxY - groundY);
+                ctx.beginPath();
+                ctx.moveTo(0, groundY);
+                ctx.lineTo(canvas.width, groundY);
+                ctx.strokeStyle = soilLine;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                ctx.font = '11px Inter';
+                ctx.fillStyle = soilText;
+                ctx.textAlign = 'left';
+                ctx.fillText('地面線 Ground Level', 20, groundY - 6);
+            }
+
+            // 3. Water Level
+            const waterY = groundY + res.z1 * scale;
+            if (waterY < canvas.height && waterY > 0) {
+                ctx.beginPath();
+                ctx.moveTo(0, waterY);
+                ctx.lineTo(canvas.width, waterY);
+                ctx.strokeStyle = waterLine;
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([8, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = waterLine;
+                ctx.beginPath();
+                ctx.moveTo(35, waterY);
+                ctx.lineTo(30, waterY + 6);
+                ctx.lineTo(40, waterY + 6);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.font = '11px Inter';
+                ctx.fillStyle = waterText;
+                ctx.textAlign = 'left';
+                ctx.fillText(`地下水位 WL (z1 = ${res.z1.toFixed(1)}m)`, 50, waterY - 6);
+            }
+
+            // 4. Concrete Culvert
+            const xOuter0 = mapX(0);
+            const yOuter0 = mapY(0);
+            const outerW = res.Bo * scale;
+            const outerH = res.Do * scale;
+
+            const xInner0 = mapX(res.Tb);
+            const yInner0 = mapY(res.Tu);
+            const innerW = res.Bi * scale;
+            const innerH = res.Di * scale;
+
+            ctx.fillStyle = concreteBg; 
+            ctx.fillRect(xOuter0, yOuter0, outerW, outerH);
+
+            ctx.fillStyle = innerHoleBg;
+            ctx.fillRect(xInner0, yInner0, innerW, innerH);
+
+            ctx.strokeStyle = outlineStroke;
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(xOuter0, yOuter0, outerW, outerH);
+            ctx.strokeRect(xInner0, yInner0, innerW, innerH);
+
+            // 5. Member centerlines
+            const xC0 = mapX(res.Tb / 2);
+            const yC0 = mapY(res.Tu / 2);
+            const centerW = res.B * scale;
+            const centerH = res.D * scale;
+
+            ctx.strokeStyle = centerLineColor;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.strokeRect(xC0, yC0, centerW, centerH);
+            ctx.setLineDash([]);
+
+            // Draw Node Dots
+            const nodes = [
+                { x: xC0, y: yC0, label: 'A' },
+                { x: xC0 + centerW, y: yC0, label: 'B' },
+                { x: xC0, y: yC0 + centerH, label: 'C' },
+                { x: xC0 + centerW, y: yC0 + centerH, label: 'D' }
+            ];
+            ctx.fillStyle = nodeDotColor;
+            nodes.forEach(node => {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.font = 'bold 11px Inter';
+                ctx.fillStyle = textMain;
+                
+                // Position node labels inside the corners of the inner culvert opening
+                // to completely avoid overlap with loads, dimensions, or outer rebars.
+                let ox = 0, oy = 0;
+                if (node.label === 'A') { ox = 10; oy = 16; }
+                else if (node.label === 'B') { ox = -18; oy = 16; }
+                else if (node.label === 'C') { ox = 10; oy = -10; }
+                else if (node.label === 'D') { ox = -18; oy = -10; }
+                
+                ctx.fillText(node.label, node.x + ox, node.y + oy);
+            });
+
+            // 6. Dimension Annotations
+            ctx.strokeStyle = dimLine;
+            ctx.lineWidth = 1;
+            ctx.fillStyle = dimLine;
+            ctx.font = '10px Inter';
+
+            const drawHDim = (y, x1, x2, text) => {
+                ctx.beginPath();
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x2, y);
+                ctx.moveTo(x1, y - 4); ctx.lineTo(x1, y + 4);
+                ctx.moveTo(x2, y - 4); ctx.lineTo(x2, y + 4);
+                ctx.stroke();
+                ctx.fillStyle = dimText;
+                ctx.textAlign = 'center';
+                ctx.fillText(text, (x1 + x2) / 2, y - 6);
+            };
+
+            const drawVDim = (x, y1, y2, text) => {
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                ctx.lineTo(x, y2);
+                ctx.moveTo(x - 4, y1); ctx.lineTo(x + 4, y1);
+                ctx.moveTo(x - 4, y2); ctx.lineTo(x + 4, y2);
+                ctx.stroke();
+                ctx.fillStyle = dimText;
+                ctx.textAlign = 'left';
+                ctx.fillText(text, x + 6, (y1 + y2) / 2 + 3);
+            };
+
+            // Outer Dimensions
+            drawHDim(yOuter0 - 45, xOuter0, xOuter0 + outerW, `Bo = ${res.Bo.toFixed(2)} m`);
+            
+            // Shift Outer height Do to the RIGHT side to avoid overlapping with lateral soil loads on the left
+            drawVDim(xOuter0 + outerW + 45, yOuter0, yOuter0 + outerH, `Do = ${res.Do.toFixed(2)} m`);
+            
+            // Inner Opening (Bi keeps horizontal center, Di shifts to horizontal center to clear nodes and rebar dots)
+            drawHDim(yInner0 + 20, xInner0, xInner0 + innerW, `Bi = ${res.Bi.toFixed(2)} m`);
+            
+            // Draw Di in the horizontal center of inner box to avoid side wall congestion
+            drawVDim(xInner0 + innerW / 2, yInner0, yInner0 + innerH, `Di = ${res.Di.toFixed(2)} m`);
+
+            // Shift slab thicknesses (Tu, Td) to the RIGHT side inside the inner opening to avoid left side congestion
+            drawVDim(xInner0 + innerW - 15, yOuter0, yInner0, `Tu=${res.Tu.toFixed(2)}m`);
+            drawVDim(xInner0 + innerW - 15, yInner0 + innerH, yOuter0 + outerH, `Td=${res.Td.toFixed(2)}m`);
+            
+            // Shift side wall thickness Tb to the RIGHT wall top side
+            drawHDim(yInner0 - 12, xInner0 + innerW, xOuter0 + outerW, `Tb=${res.Tb.toFixed(2)}m`);
+
+            // 7. Load Indicators
+            ctx.textAlign = 'center';
+            const arrowSpacing = 20;
+            
+            // W1 arrows
+            ctx.strokeStyle = isDark ? 'rgba(248, 113, 113, 0.8)' : 'rgba(239, 68, 68, 0.7)'; 
+            ctx.fillStyle = isDark ? 'rgba(248, 113, 113, 0.9)' : 'rgba(239, 68, 68, 0.8)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(xOuter0, yOuter0 - 15);
+            ctx.lineTo(xOuter0 + outerW, yOuter0 - 15);
+            ctx.stroke();
+
+            for (let x = xOuter0 + 5; x < xOuter0 + outerW; x += arrowSpacing) {
+                ctx.beginPath();
+                ctx.moveTo(x, yOuter0 - 15);
+                ctx.lineTo(x, yOuter0 - 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x - 3, yOuter0 - 6);
+                ctx.lineTo(x, yOuter0 - 2);
+                ctx.lineTo(x + 3, yOuter0 - 6);
+                ctx.fill();
+            }
+            ctx.font = 'bold 11px Inter';
+            ctx.fillStyle = textMain;
+            ctx.fillText(`W1 = ${res.W1.toFixed(2)} t/m`, canvasCenterX, yOuter0 - 24);
+
+            // W2 arrows
+            ctx.strokeStyle = isDark ? 'rgba(52, 211, 153, 0.8)' : 'rgba(16, 185, 129, 0.7)'; 
+            ctx.fillStyle = isDark ? 'rgba(52, 211, 153, 0.9)' : 'rgba(16, 185, 129, 0.8)';
+            ctx.beginPath();
+            ctx.moveTo(xOuter0, yOuter0 + outerH + 15);
+            ctx.lineTo(xOuter0 + outerW, yOuter0 + outerH + 15);
+            ctx.stroke();
+
+            for (let x = xOuter0 + 5; x < xOuter0 + outerW; x += arrowSpacing) {
+                ctx.beginPath();
+                ctx.moveTo(x, yOuter0 + outerH + 15);
+                ctx.lineTo(x, yOuter0 + outerH + 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x - 3, yOuter0 + outerH + 6);
+                ctx.lineTo(x, yOuter0 + outerH + 2);
+                ctx.lineTo(x + 3, yOuter0 + outerH + 6);
+                ctx.fill();
+            }
+            ctx.fillStyle = textMain;
+            ctx.fillText(`W2 = ${res.W2.toFixed(2)} t/m`, canvasCenterX, yOuter0 + outerH + 28);
+
+            // P1 -> P2 trapezoid lateral force arrows
+            ctx.strokeStyle = isDark ? 'rgba(251, 146, 60, 0.8)' : 'rgba(234, 88, 12, 0.6)'; 
+            ctx.fillStyle = isDark ? 'rgba(251, 146, 60, 0.9)' : 'rgba(234, 88, 12, 0.7)';
+            
+            const maxArrowLen = 35;
+            const pArrowScale = (res.P2 > 0) ? maxArrowLen / res.P2 : 0;
+            const xWallLeft = xOuter0;
+            
+            const arrowCount = 6;
+            ctx.beginPath();
+            ctx.moveTo(xWallLeft - res.P1 * pArrowScale, yOuter0);
+            ctx.lineTo(xWallLeft - res.P2 * pArrowScale, yOuter0 + outerH);
+            ctx.stroke();
+
+            for (let i = 0; i < arrowCount; i++) {
+                const fraction = i / (arrowCount - 1);
+                const y = yOuter0 + outerH * fraction;
+                const force = res.P1 + (res.P2 - res.P1) * fraction;
+                const arrowLen = force * pArrowScale;
+                const xStart = xWallLeft - arrowLen;
+                const xEnd = xWallLeft - 2;
+
+                ctx.beginPath();
+                ctx.moveTo(xStart, y);
+                ctx.lineTo(xEnd, y);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(xEnd - 4, y - 3);
+                ctx.lineTo(xEnd, y);
+                ctx.lineTo(xEnd - 4, y + 3);
+                ctx.fill();
+            }
+            
+            ctx.font = '10px Inter';
+            ctx.textAlign = 'right';
+            ctx.fillText(`P1=${res.P1.toFixed(2)}`, xWallLeft - res.P1 * pArrowScale - 4, yOuter0 + 8);
+            ctx.fillText(`P2=${res.P2.toFixed(2)}`, xWallLeft - res.P2 * pArrowScale - 4, yOuter0 + outerH - 4);
+        }
+
+        // Draw reinforcement details (Rebar layout schematic diagram)
+        function drawRebarDiagram(res) {
+            const canvas = document.getElementById('rebarCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            
+            // Theme colors
+            const canvasBg = isDark ? '#151f32' : '#f8fafc';
+            const concreteBg = isDark ? '#27354a' : '#e2e8f0';
+            const innerHoleBg = isDark ? '#151f32' : '#ffffff';
+            const outlineStroke = isDark ? '#475569' : '#475569';
+            const dimLine = isDark ? '#5c7290' : '#64748b';
+            const dimText = isDark ? '#cbd5e1' : '#475569';
+            const dimGuide = isDark ? '#27354a' : '#e2e8f0';
+            const leaderLine = isDark ? '#5c7290' : '#475569';
+            const leaderText = isDark ? '#f8fafc' : '#0f172a';
+            const legendBg = isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+            const legendBorder = isDark ? '#334155' : '#cbd5e1';
+            const legendText = isDark ? '#f8fafc' : '#0f172a';
+            const rebarRed = '#dc2626'; // Keep rebar red bright
+            const rebarBlue = isDark ? '#60a5fa' : '#2563eb'; // Bright blue for dark mode dot
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Increase padding to make space for outer labels and dimensions
+            const padding = 125;
+            const drawW = canvas.width - 2 * padding;
+            const drawH = canvas.height - 2 * padding;
+            const marginSize = 0.5; 
+            const virtualW = res.Bo + 2 * marginSize;
+            const virtualH = res.Do + 2 * marginSize;
+            const scale = Math.min(drawW / virtualW, drawH / virtualH);
+
+            const canvasCenterX = canvas.width / 2;
+            const canvasCenterY = canvas.height / 2;
+
+            const mapX = (vx) => canvasCenterX + (vx - res.Bo / 2) * scale;
+            const mapY = (vy) => canvasCenterY + (vy - res.Do / 2) * scale;
+
+            // Background
+            ctx.fillStyle = canvasBg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Concrete Outer/Inner box
+            const xOuter0 = mapX(0);
+            const yOuter0 = mapY(0);
+            const outerW = res.Bo * scale;
+            const outerH = res.Do * scale;
+
+            const xInner0 = mapX(res.Tb);
+            const yInner0 = mapY(res.Tu);
+            const innerW = res.Bi * scale;
+            const innerH = res.Di * scale;
+
+            // Fillet size (15 cm = 0.15 m)
+            const filletPx = 0.15 * scale;
+
+            // Fill concrete area with light gray
+            ctx.fillStyle = concreteBg; 
+            ctx.fillRect(xOuter0, yOuter0, outerW, outerH);
+
+            // Fill inner box with white (with 15cm fillet corners)
+            ctx.fillStyle = innerHoleBg;
+            ctx.beginPath();
+            ctx.moveTo(xInner0 + filletPx, yInner0);
+            ctx.lineTo(xInner0 + innerW - filletPx, yInner0);
+            ctx.lineTo(xInner0 + innerW, yInner0 + filletPx);
+            ctx.lineTo(xInner0 + innerW, yInner0 + innerH - filletPx);
+            ctx.lineTo(xInner0 + innerW - filletPx, yInner0 + innerH);
+            ctx.lineTo(xInner0 + filletPx, yInner0 + innerH);
+            ctx.lineTo(xInner0, yInner0 + innerH - filletPx);
+            ctx.lineTo(xInner0, yInner0 + filletPx);
+            ctx.closePath();
+            ctx.fill();
+
+            // Stroke boundaries
+            ctx.strokeStyle = outlineStroke;
+            ctx.lineWidth = 2.0;
+            ctx.strokeRect(xOuter0, yOuter0, outerW, outerH);
+            
+            ctx.beginPath();
+            ctx.moveTo(xInner0 + filletPx, yInner0);
+            ctx.lineTo(xInner0 + innerW - filletPx, yInner0);
+            ctx.lineTo(xInner0 + innerW, yInner0 + filletPx);
+            ctx.lineTo(xInner0 + innerW, yInner0 + innerH - filletPx);
+            ctx.lineTo(xInner0 + innerW - filletPx, yInner0 + innerH);
+            ctx.lineTo(xInner0 + filletPx, yInner0 + innerH);
+            ctx.lineTo(xInner0, yInner0 + innerH - filletPx);
+            ctx.lineTo(xInner0, yInner0 + filletPx);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Helper to get formatted text (e.g. D19)
+            const getRebarText = (sec) => {
+                const sizeId = document.getElementById(`rebar-size-${sec}`).value;
+                const sp = document.getElementById(`rebar-sp-${sec}`).value;
+                const code = REBAR_DB[sizeId] ? REBAR_DB[sizeId].code : 'D19';
+                return `${code}@${sp}`;
+            };
+            const getTempText = (sec) => {
+                const sizeId = document.getElementById(`temp-size-${sec}`).value;
+                const sp = document.getElementById(`temp-sp-${sec}`).value;
+                const code = REBAR_DB[sizeId] ? REBAR_DB[sizeId].code : 'D13';
+                return `${code}@${sp}`;
+            };
+
+            // Calculate proportional cover depth from actual input cover (cm)
+            const coverCm = parseFloat(document.getElementById('rebar-cover').value) || 5;
+            // Cap the cover visually to at least 4cm and at most 10cm, converted to scale pixels
+            const coverPx = (Math.max(4, Math.min(10, coverCm)) / 100) * scale;
+            
+            // Draw Main Rebar Lines (Red solid lines)
+            ctx.strokeStyle = rebarRed; 
+            ctx.lineWidth = 1.8;
+            
+            // 1. Outer rectangular rebar mesh (enclosed)
+            ctx.strokeRect(xOuter0 + coverPx, yOuter0 + coverPx, outerW - 2 * coverPx, outerH - 2 * coverPx);
+
+            // 2. Inner rectangular rebar mesh (with fillet corners)
+            const fRebarPx = filletPx + coverPx - coverPx * 0.3;
+            ctx.beginPath();
+            ctx.moveTo(xInner0 - coverPx + fRebarPx, yInner0 - coverPx);
+            ctx.lineTo(xInner0 + innerW + coverPx - fRebarPx, yInner0 - coverPx);
+            // corners
+            ctx.lineTo(xInner0 + innerW + coverPx, yInner0 - coverPx + fRebarPx);
+            ctx.lineTo(xInner0 + innerW + coverPx, yInner0 + innerH + coverPx - fRebarPx);
+            ctx.lineTo(xInner0 + innerW + coverPx - fRebarPx, yInner0 + innerH + coverPx);
+            ctx.lineTo(xInner0 - coverPx + fRebarPx, yInner0 + innerH + coverPx);
+            ctx.lineTo(xInner0 - coverPx, yInner0 + innerH + coverPx - fRebarPx);
+            ctx.lineTo(xInner0 - coverPx, yInner0 - coverPx + fRebarPx);
+            ctx.closePath();
+            ctx.stroke();
+
+            // 3. Diagonal corner reinforcement rebars (斜向剪力角筋)
+            ctx.beginPath();
+            const offsetDiag = coverPx * 0.7;
+            // Top-Left
+            ctx.moveTo(xInner0 + filletPx - offsetDiag, yInner0 - offsetDiag);
+            ctx.lineTo(xInner0 - offsetDiag, yInner0 + filletPx - offsetDiag);
+            // Top-Right
+            ctx.moveTo(xInner0 + innerW - filletPx + offsetDiag, yInner0 - offsetDiag);
+            ctx.lineTo(xInner0 + innerW + offsetDiag, yInner0 + filletPx - offsetDiag);
+            // Bottom-Left
+            ctx.moveTo(xInner0 - offsetDiag, yInner0 + innerH - filletPx + offsetDiag);
+            ctx.lineTo(xInner0 + filletPx - offsetDiag, yInner0 + innerH + offsetDiag);
+            // Bottom-Right
+            ctx.moveTo(xInner0 + innerW + offsetDiag, yInner0 + innerH - filletPx + offsetDiag);
+            ctx.lineTo(xInner0 + innerW - filletPx + offsetDiag, yInner0 + innerH + offsetDiag);
+            ctx.stroke();
+
+            // 4. Draw temperature/distribution rebar dots (blue circles)
+            ctx.fillStyle = rebarBlue;
+            const drawDot = (x, y) => {
+                ctx.beginPath();
+                ctx.arc(x, y, 2.5, 0, 2 * Math.PI);
+                ctx.fill();
+            };
+
+            const spacingPx = 25; // Dots spacing in pixels
+            const dotOffset = coverPx * 0.6; // Dots offset from main rebar (strictly inside the concrete)
+
+            // Define exact dot coordinates for slabs to ensure alignment and accurate leader targets
+            const slabDotsX = [];
+            const xDotStart = xOuter0 + coverPx + 15;
+            const xDotEnd = xOuter0 + outerW - coverPx - 15;
+            const xDotCount = Math.floor((xDotEnd - xDotStart) / spacingPx);
+            for (let i = 0; i <= xDotCount; i++) {
+                slabDotsX.push(xDotStart + i * spacingPx);
+            }
+
+            // Define exact dot coordinates for walls (strictly aligned horizontally, no staggering)
+            const wallDotsY = [];
+            const yDotStart = yInner0 + 15;
+            const yDotEnd = yInner0 + innerH - 15;
+            const yDotCount = Math.floor((yDotEnd - yDotStart) / spacingPx);
+            for (let i = 0; i <= yDotCount; i++) {
+                wallDotsY.push(yDotStart + i * spacingPx);
+            }
+
+            // Top slab upper dots (under outer top rebar)
+            const dotY1 = yOuter0 + coverPx + dotOffset;
+            slabDotsX.forEach(x => drawDot(x, dotY1));
+
+            // Top slab lower dots (above inner top rebar)
+            const dotY2 = yInner0 - coverPx - dotOffset;
+            slabDotsX.forEach(x => drawDot(x, dotY2));
+
+            // Bottom slab upper dots (under inner bottom rebar)
+            const dotY3 = yInner0 + innerH + coverPx + dotOffset;
+            slabDotsX.forEach(x => drawDot(x, dotY3));
+
+            // Bottom slab lower dots (above outer bottom rebar)
+            const dotY4 = yOuter0 + outerH - coverPx - dotOffset;
+            slabDotsX.forEach(x => drawDot(x, dotY4));
+
+            // Left wall outer dots
+            const dotX1 = xOuter0 + coverPx + dotOffset;
+            wallDotsY.forEach(y => drawDot(dotX1, y));
+
+            // Left wall inner dots
+            const dotX2 = xInner0 - coverPx - dotOffset;
+            wallDotsY.forEach(y => drawDot(dotX2, y));
+
+            // Right wall inner dots
+            const dotX3 = xInner0 + innerW + coverPx + dotOffset;
+            wallDotsY.forEach(y => drawDot(dotX3, y));
+
+            // Right wall outer dots
+            const dotX4 = xOuter0 + outerW - coverPx - dotOffset;
+            wallDotsY.forEach(y => drawDot(dotX4, y));
+
+            // 5. Draw Construction Joint (施工縫)
+            const yCJ = yOuter0 + outerH - res.Td * scale - 20;
+            ctx.strokeStyle = dimLine;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath();
+            ctx.moveTo(xOuter0 + outerW - res.Tb * scale, yCJ);
+            ctx.lineTo(xOuter0 + outerW, yCJ);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset line dash
+
+            // 6. Dimension Lines (尺寸線)
+            const drawDimH = (x1, x2, y, text) => {
+                ctx.strokeStyle = dimLine;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x2, y);
+                ctx.stroke();
+                const tick = 4;
+                ctx.beginPath();
+                ctx.moveTo(x1 - tick, y + tick); ctx.lineTo(x1 + tick, y - tick);
+                ctx.moveTo(x2 - tick, y + tick); ctx.lineTo(x2 + tick, y - tick);
+                ctx.stroke();
+                ctx.fillStyle = dimText;
+                ctx.font = '500 10px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText(text, (x1 + x2) / 2, y - 4);
+            };
+
+            const drawDimV = (x, y1, y2, text) => {
+                ctx.strokeStyle = dimLine;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                ctx.lineTo(x, y2);
+                ctx.stroke();
+                const tick = 4;
+                ctx.beginPath();
+                ctx.moveTo(x - tick, y1 + tick); ctx.lineTo(x + tick, y1 - tick);
+                ctx.moveTo(x - tick, y2 + tick); ctx.lineTo(x + tick, y2 - tick);
+                ctx.stroke();
+                ctx.fillStyle = dimText;
+                ctx.font = '500 10px Inter';
+                ctx.textAlign = 'right';
+                ctx.fillText(text, x - 6, (y1 + y2) / 2 + 3);
+            };
+
+            // Top dimensions horizontal extension guides
+            ctx.strokeStyle = dimGuide;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(xOuter0, yOuter0 - 78); ctx.lineTo(xOuter0, yOuter0);
+            ctx.moveTo(xInner0, yOuter0 - 78); ctx.lineTo(xInner0, yInner0);
+            ctx.moveTo(xInner0 + innerW, yOuter0 - 78); ctx.lineTo(xInner0 + innerW, yInner0);
+            ctx.moveTo(xOuter0 + outerW, yOuter0 - 78); ctx.lineTo(xOuter0 + outerW, yOuter0);
+            ctx.stroke();
+
+            // Draw horizontal dimensions
+            drawDimH(xOuter0, xInner0, yOuter0 - 70, (res.Tb * 100).toFixed(0));
+            drawDimH(xInner0, xInner0 + innerW, yOuter0 - 70, (res.Bi * 100).toFixed(0));
+            drawDimH(xInner0 + innerW, xOuter0 + outerW, yOuter0 - 70, (res.Tb * 100).toFixed(0));
+
+            // Left dimensions vertical extension guides
+            ctx.beginPath();
+            ctx.moveTo(xOuter0 - 78, yOuter0); ctx.lineTo(xOuter0, yOuter0);
+            ctx.moveTo(xOuter0 - 78, yInner0); ctx.lineTo(xInner0, yInner0);
+            ctx.moveTo(xOuter0 - 78, yInner0 + innerH); ctx.lineTo(xInner0, yInner0 + innerH);
+            ctx.moveTo(xOuter0 - 78, yOuter0 + outerH); ctx.lineTo(xOuter0, yOuter0 + outerH);
+            ctx.stroke();
+
+            // Draw vertical dimensions
+            drawDimV(xOuter0 - 70, yOuter0, yInner0, (res.Tu * 100).toFixed(0));
+            drawDimV(xOuter0 - 70, yInner0, yInner0 + innerH, (res.Di * 100).toFixed(0));
+            drawDimV(xOuter0 - 70, yInner0 + innerH, yOuter0 + outerH, (res.Td * 100).toFixed(0));
+
+            // 7. Leader lines and descriptions (all placed OUTSIDE/INSIDE cleanly to match the user's Excel style)
+            ctx.strokeStyle = leaderLine;
+            ctx.lineWidth = 1;
+
+            const drawLeader = (xTarget, yTarget, xBreak, yBreak, xTextEnd, text, align = 'center') => {
+                ctx.beginPath();
+                ctx.moveTo(xTarget, yTarget);
+                ctx.lineTo(xBreak, yBreak);
+                ctx.lineTo(xTextEnd, yBreak);
+                ctx.strokeStyle = leaderLine;
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(xTarget, yTarget, 2.5, 0, 2 * Math.PI);
+                ctx.fillStyle = rebarRed;
+                ctx.fill();
+
+                ctx.fillStyle = leaderText;
+                ctx.font = '500 11px Inter';
+                ctx.textAlign = align;
+                ctx.fillText(text, xTextEnd, yBreak - 4);
+            };
+
+            const drawMultiLeader = (targets, xBreak, yBreak, xTextEnd, text, align = 'center') => {
+                ctx.beginPath();
+                targets.forEach(t => {
+                    ctx.moveTo(t[0], t[1]);
+                    ctx.lineTo(xBreak, yBreak);
+                });
+                ctx.lineTo(xTextEnd, yBreak);
+                ctx.strokeStyle = leaderLine;
+                ctx.stroke();
+                
+                targets.forEach(t => {
+                    ctx.beginPath();
+                    ctx.arc(t[0], t[1], 2, 0, 2 * Math.PI);
+                    ctx.fillStyle = rebarRed;
+                    ctx.fill();
+                });
+
+                ctx.fillStyle = leaderText;
+                ctx.font = '500 11px Inter';
+                ctx.textAlign = align;
+                ctx.fillText(text, xTextEnd, yBreak - 4);
+            };
+
+            // Calculate precise leader target coordinates (strictly avoiding dots for main, locking onto dots for temp)
+            const midIndexSlab = Math.floor(slabDotsX.length / 2);
+            const midIndexWall = Math.floor(wallDotsY.length / 2);
+
+            // Targets for Slabs
+            // 1. Joint A Main (Top Left Upper Main) -> Red line, avoid dot (place to the left of the 1st dot)
+            const targetMainA_X = slabDotsX[0] - 8;
+            const targetMainA_Y = yOuter0 + coverPx;
+
+            // 2. Span AB Main (Top Center Lower Main) -> Red line, avoid dot (place exactly midway between two center dots)
+            const targetMainAB_X = slabDotsX[midIndexSlab] + spacingPx / 2;
+            const targetMainAB_Y = yInner0 - coverPx;
+
+            // 3. Top Temp (Distribution dots) -> Pointer to the 3rd dot from the right
+            const targetTempA_X = slabDotsX[slabDotsX.length - 3] || (xOuter0 + outerW - 80);
+
+            // 4. Joint C Main (Bottom Left Lower Main) -> Red line, avoid dot (place to the left of the 1st dot)
+            const targetMainC_X = slabDotsX[0] - 8;
+            const targetMainC_Y = yOuter0 + outerH - coverPx;
+
+            // 5. Span CD Main (Bottom Center Upper Main) -> Red line, avoid dot (place exactly midway between two center dots)
+            const targetMainCD_X = slabDotsX[midIndexSlab] + spacingPx / 2;
+            const targetMainCD_Y = yInner0 + innerH + coverPx;
+
+            // 6. Bottom Temp (Distribution dots) -> Pointer to the 3rd dot from the right
+            const targetTempC_X = slabDotsX[slabDotsX.length - 3] || (xOuter0 + outerW - 80);
+
+            // Targets for Walls
+            // 1. Wall Main (Left/Right Wall Main rebars) -> Red line, avoid dot (place midway between two upper center dots)
+            const targetMainWall_Y = wallDotsY[midIndexWall - 1] + spacingPx / 2;
+
+            // 2. Wall Temp (Left/Right Wall Temp dots) -> Direct pointer to the center of the lower middle blue dot
+            const targetTempWall_Y = wallDotsY[midIndexWall + 1];
+
+            // --- Top Side Labels (y < yOuter0) ---
+            // Joint A (Top Left Upper Main) -> Pull left-up (align textEnd to left column, lower level)
+            drawLeader(
+                targetMainA_X, targetMainA_Y,
+                xOuter0 + 10, yOuter0 - 15,
+                xOuter0 - 90,
+                `${getRebarText('A')}`, 'right'
+            );
+
+            // Span AB (Top Center Lower Main) -> Pull center-left-up (align to left column, higher level, clears Joint A)
+            drawLeader(
+                targetMainAB_X, targetMainAB_Y,
+                canvasCenterX - 30, yOuter0 - 35,
+                xOuter0 - 90,
+                `${getRebarText('AB')}`, 'right'
+            );
+
+            // Top Temp (Multi leader to top upper/lower dots) -> Pull right-up (align to right column, middle level)
+            drawMultiLeader(
+                [[targetTempA_X, dotY1], [targetTempA_X, dotY2]],
+                xOuter0 + outerW + 25, yOuter0 - 25,
+                xOuter0 + outerW + 90,
+                `溫度鋼筋: ${getTempText('A')}`, 'left'
+            );
+
+            // --- Bottom Side Labels (y > yOuter0 + outerH) ---
+            // Joint C (Bottom Left Lower Main) -> Pull left-down (align to left column, higher level)
+            drawLeader(
+                targetMainC_X, targetMainC_Y,
+                xOuter0 + 10, yOuter0 + outerH + 15,
+                xOuter0 - 90,
+                `${getRebarText('C')}`, 'right'
+            );
+
+            // Span CD (Bottom Center Upper Main) -> Pull center-left-down (align to left column, lower level, clears Joint C)
+            drawLeader(
+                targetMainCD_X, targetMainCD_Y,
+                canvasCenterX - 30, yOuter0 + outerH + 35,
+                xOuter0 - 90,
+                `${getRebarText('CD')}`, 'right'
+            );
+
+            // Bottom Temp (Multi leader to bottom upper/lower dots) -> Pull right-down (align to right column, middle level)
+            drawMultiLeader(
+                [[targetTempC_X, dotY3], [targetTempC_X, dotY4]],
+                xOuter0 + outerW + 25, yOuter0 + outerH + 25,
+                xOuter0 + outerW + 90,
+                `溫度鋼筋: ${getTempText('C')}`, 'left'
+            );
+
+            // --- Right Side Labels (x > xOuter0 + outerW, all perfectly aligned to the right column) ---
+            // Right Wall Main (Multi leader to right inner/outer rebars) -> Pull right
+            drawMultiLeader(
+                [[xInner0 + innerW + coverPx, targetMainWall_Y], [xOuter0 + outerW - coverPx, targetMainWall_Y]],
+                xOuter0 + outerW + 25, yInner0 + innerH / 2 - 35,
+                xOuter0 + outerW + 90,
+                `${getRebarText('AC')}`, 'left'
+            );
+
+            // Right Wall Temp (Multi leader to right inner/outer dots) -> Pull right
+            drawMultiLeader(
+                [[dotX3, targetTempWall_Y], [dotX4, targetTempWall_Y]],
+                xOuter0 + outerW + 25, yInner0 + innerH / 2 + 15,
+                xOuter0 + outerW + 90,
+                `溫度鋼筋: ${getTempText('AC')}`, 'left'
+            );
+
+            // Right diagonal corner rebar (Diagonal reinforcement) -> Pull right-down
+            drawLeader(
+                xInner0 + innerW - filletPx / 2 + 5, yInner0 + innerH - filletPx / 2 + 5,
+                xOuter0 + outerW + 25, yOuter0 + outerH - 20,
+                xOuter0 + outerW + 90,
+                `溫度鋼筋: ${getTempText('C')}`, 'left'
+            );
+
+            // Construction Joint Label -> Pull right-down
+            drawLeader(
+                xOuter0 + outerW - 5, yCJ,
+                xOuter0 + outerW + 25, yCJ,
+                xOuter0 + outerW + 90,
+                `Construction joint`, 'left'
+            );
+
+            // Right fillet Corner label -> Pull right-up
+            drawLeader(
+                xInner0 + innerW - filletPx / 2, yInner0 + filletPx / 2,
+                xOuter0 + outerW + 20, yOuter0 + 10,
+                xOuter0 + outerW + 90,
+                `0.15 fillet`, 'left'
+            );
+
+            // Draw Legend
+            ctx.fillStyle = legendBg;
+            ctx.fillRect(canvas.width - 130, 15, 115, 45);
+            ctx.strokeStyle = legendBorder;
+            ctx.strokeRect(canvas.width - 130, 15, 115, 45);
+            
+            ctx.fillStyle = rebarRed;
+            ctx.fillRect(canvas.width - 122, 23, 14, 3);
+            ctx.fillStyle = legendText;
+            ctx.font = '10px Inter';
+            ctx.textAlign = 'left';
+            ctx.fillText('主受力鋼筋', canvas.width - 100, 27);
+
+            ctx.beginPath();
+            ctx.arc(canvas.width - 115, 45, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = rebarBlue;
+            ctx.fill();
+            ctx.fillStyle = legendText;
+            ctx.fillText('溫度鋼筋', canvas.width - 100, 48);
+        }
+
+        // Toggle detailed member internal force distribution panel (Section 7)
+        function toggleDetails() {
+            const content = document.getElementById('detail-section');
+            const arrow = document.getElementById('detail-arrow');
+            if (content && arrow) {
+                content.classList.toggle('expanded');
+                arrow.classList.toggle('rotated');
+            }
+        }
+
+        // Toggle theme (Light / Dark)
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            const currentTheme = html.getAttribute('data-theme');
+            
+            if (currentTheme === 'dark') {
+                html.removeAttribute('data-theme');
+                if (themeIcon) themeIcon.textContent = '🌙';
+                if (themeText) themeText.textContent = '深色模式';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                if (themeIcon) themeIcon.textContent = '☀️';
+                if (themeText) themeText.textContent = '淺色模式';
+                localStorage.setItem('theme', 'dark');
+            }
+            
+            // Re-draw diagrams to apply theme color changes
+            triggerCalculation();
+        }
+
+        // Apply theme from localStorage on load
+        function applyInitialTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (savedTheme === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+                if (themeIcon) themeIcon.textContent = '☀️';
+                if (themeText) themeText.textContent = '淺色模式';
+            } else {
+                html.removeAttribute('data-theme');
+                if (themeIcon) themeIcon.textContent = '🌙';
+                if (themeText) themeText.textContent = '深色模式';
+            }
+        }
+
+        // Start initialization
+        window.addEventListener('load', () => {
+            applyInitialTheme();
+            initRebarDropdowns();
+            triggerCalculation();
+        });
+    </script>
+</body>
+</html>
